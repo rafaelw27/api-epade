@@ -1,0 +1,22 @@
+{
+    "require": {
+        "baka/http": "dev-master",
+        "baka/database": "dev-master",
+        "baka/auth": "feature-saslevel-login-dev",
+        "baka/saas": "dev-master",
+        "baka/phalconphp-hmac": "dev-auth-phalcon-3",
+        "baka/mail": "dev-master",
+        "phalcon/incubator": "3.0.x-dev",
+        "ezyang/htmlpurifier": "dev-master",
+        "nesbot/carbon": "^1.21",
+        "guzzlehttp/guzzle": "~6.0",
+        "league/flysystem": "1.1.*@dev",
+        "vlucas/phpdotenv": "^2.2",
+        "monolog/monolog": "^1.16",
+        "symfony/var-dumper": "^3.0",
+        "phpoffice/phpexcel": "^1.8",
+        "league/csv": "^8.2",
+        "duncan3dc/fork-helper": "dev-master"
+
+    }
+}
