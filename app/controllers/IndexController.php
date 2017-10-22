@@ -24,7 +24,7 @@ class IndexController extends \Baka\Http\Rest\CrudExtendedController
     public function index($id = null): Response
     {
 
-
+        print_r("Git test");
         return $this->response(['Hello World']);
     }
 
