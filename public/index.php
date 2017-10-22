@@ -56,6 +56,17 @@ try {
 
     $application->handle();
 } catch (Throwable $e) {
+    if ($config->application->production) {
+        /**
+         * Send email on fail
+         */
+        $di->getMail()
+            ->to(['jrosario@mctekk.com', 'max@mctekk.com', 'rwhite@mctekk.com'])
+        // ->to('max@mctekk.com')
+            ->subject('Gewaer Fail')
+            ->content($e->getMessage() . $e->getTrace())
+            ->send();
+    }
 
     $response = new Phalcon\Http\Response();
     $response->setStatusCode(404, "Not Found");
@@ -67,6 +78,8 @@ try {
             'trace' => $e->getTraceAsString(),
         ],
     ]);
+
+    $di->getLog()->addError($e->getMessage(), $e->getTrace());
 
     $response->send();
 }
