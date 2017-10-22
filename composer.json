@@ -1,4 +1,23 @@
 {
+    "repositories": [{
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/baka-phalconphp-hmac.git"
+    }, {
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/database.git"
+    }, {
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/http.git"
+    }, {
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/auth.git"
+    }, {
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/mail.git"
+    }, {
+        "type": "vcs",
+        "url": "git@bitbucket.org:mctekk/saas.git"
+    }],
     "require": {
         "baka/http": "dev-master",
         "baka/database": "dev-master",
