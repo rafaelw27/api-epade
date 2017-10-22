@@ -59,8 +59,8 @@ return new \Phalcon\Config([
         'uploadDir' => '',
     ],
     'namespace' => [
-        'controller' => 'Incursio\Controllers',
-        'models' => 'Incursio\Models',
+        'controller' => 'Epade\Controllers',
+        'models' => 'Epade\Models',
     ],
     'memcache' => [
         'host' => getenv('MEMCACHE_HOST'),

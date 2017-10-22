@@ -7,9 +7,9 @@ $loader = new \Phalcon\Loader();
  */
 $loader->registerNamespaces([
     'Mesocom\Controllers' => $config->application->controllersDir, //migrate from mesocom to incursio namespace
-    'Incursio\Controllers' => $config->application->controllersDir,
+    'Epade\Controllers' => $config->application->controllersDir,
     'Mesocom\Models' => $config->application->modelsDir,
-    'Incursio\Models' => $config->application->modelsDir,
+    'Epade\Models' => $config->application->modelsDir,
     'Mesocom' => $config->application->libraryDir,
     'Incursio' => $config->application->libraryDir,
     'Baka\Database' => '/home/baka/database/src/',
