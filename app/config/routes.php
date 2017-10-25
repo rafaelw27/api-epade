@@ -44,6 +44,13 @@ $router->delete('/users/{id}', [
     'deleteUser',
 ]);
 
+# User Authentication
+
+$router->post('/login', [
+    'Epade\Controllers\UsersController',
+    'login',
+]);
+
 $router->mount();
 
 /**

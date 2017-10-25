@@ -3,6 +3,7 @@
 namespace Epade\Controllers;
 
 use Epade\Models\Users;
+use Epade\Models\TypeUsers;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 
@@ -129,4 +130,45 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
         
         return $this->response($user);
     }
+
+    /**
+     * Authenticates a User
+     *
+     * @return Response
+     */
+    public function login(){
+
+        if($this->request->isPost()){
+
+            $email = $this->request->getPost('email','string');
+            $password = $this->request->getPost('password','string');
+        
+            $user = $this->model::findFirst([
+                "conditions" => "email = ?0 AND password = ?1",
+                "bind" =>[$email,$password],
+            ]);
+
+            if(!$user){
+                return $this->response('Email or Password incorrect');
+            }
+
+            $userType = TypeUsers::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$user->user_type_id]
+            ]);
+
+            $userData = [];
+
+            foreach ($user as $key => $value) {
+                $userData[$key] = $value;
+            }
+
+            $userData['user_type_name'] = $userType->name;
+                
+            return $this->response($userData);
+
+        }
+    }
+
+
 }

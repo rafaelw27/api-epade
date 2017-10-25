@@ -2,6 +2,7 @@
 
 namespace Epade\Models;
 
+use Phalcon\Mvc\Model;
 use Exception;
 
 class TypeUsers extends Model

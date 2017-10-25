@@ -1,8 +1,8 @@
 <?php
 
 namespace Epade\Models;
-use Phalcon\Mvc\Model;
 
+use Phalcon\Mvc\Model;
 use Exception;
 
 class Users extends Model
