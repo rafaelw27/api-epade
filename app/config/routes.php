@@ -17,6 +17,36 @@ $router->get('/', [
     'index',
 ]);
 
+# Trucks
+
+$router->get('/trucks', [
+    'Epade\Controllers\TrucksController',
+    'getTrucks',
+]);
+
+$router->get('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'getTruck',
+]);
+
+$router->post('/trucks', [
+    'Epade\Controllers\TrucksController',
+    'create',
+]);
+
+$router->post('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'editTruck',
+]);
+
+$router->delete('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'deleteTrucks',
+]);
+
+
+
+
 # Users
 
 $router->get('/users', [
