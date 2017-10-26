@@ -1,0 +1,61 @@
+<?php
+
+namespace Epade\Models;
+
+use Phalcon\Mvc\Model;
+use Exception;
+
+class Products extends Model
+{
+
+    public $id;
+
+    public $name;
+
+    public $full_name;
+
+    public $description;
+
+    public $active;
+
+    public $type;
+
+    public $taxable;
+
+    public $maker;
+
+    public $unit_price;
+
+    public $unit_volume;
+
+    public $quantity;
+
+    public $created_at;
+
+    public $updated_at;
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        $this->setSchema("api-epade");
+        //$this->belongsTo('id', '\Epade\Models\Users', 'user_type_id', ['alias' => 'user-type']);
+
+    }
+
+     /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'products';
+    }
+
+
+
+}
