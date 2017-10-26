@@ -81,6 +81,19 @@ $router->post('/login', [
     'login',
 ]);
 
+# Products
+
+$router->get('/products', [
+    'Epade\Controllers\ProductsController',
+    'index',
+]);
+
+$router->post('/products', [
+    'Epade\Controllers\ProductsController',
+    'create',
+]);
+
+
 $router->mount();
 
 /**
