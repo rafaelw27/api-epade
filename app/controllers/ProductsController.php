@@ -173,4 +173,33 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
 
     }
 
+    public function delete($id) : Response
+    {
+        if($apiItem = $this->quickbooks->Query("SELECT * FROM Item where Id= '{$id}'")){
+            
+                        $actualItem = reset($apiItem);
+                        $updateItem = Item::update($actualItem, [
+                            //If you are going to do a full Update, set sparse to false
+                            'sparse' => 'true',
+                            'Active' => "false",
+                        ]);
+            
+                        if($resultUpdate = $this->quickbooks->Update($updateItem)){
+                           
+                            $ourProduct = $this->model::findFirst([
+                                "conditions" => "id = ?0",
+                                "bind" => [$id]
+                            ]);
+            
+                            if(!$ourProduct){
+                                throw new \Exception("Product could not be found");
+                            }
+        
+                            $ourProduct->active = "false";
+            
+                            if($ourProduct->update()){
+                                return $this->response($ourProduct);
+                            }   
+    }
+        }
 }
