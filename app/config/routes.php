@@ -98,6 +98,11 @@ $router->post('/products/{id}', [
     'edit',
 ]);
 
+$router->delete('/products/{id}',[
+    'Epade\Controllers\ProductsController',
+    'delete',
+]);
+
 
 $router->mount();
 

@@ -1,6 +1,6 @@
 <?php
 namespace Epade\Controllers;
-Use Epade\Models\Trucks;
+use Epade\Models\Trucks;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 
@@ -11,7 +11,7 @@ class TrucksController extends \Baka\Http\Rest\CrudExtendedController
         $this->model = new Trucks();
     }
 
-public function Create() : Response
+public function create() : Response
 {
     $truck = $this->model->save(
         $this->request->getPost(),
@@ -20,6 +20,7 @@ public function Create() : Response
         "capacity",
         "model",
         "brand",
+        "plate"
         ]
 
     );
@@ -39,7 +40,7 @@ public function editTruck($id): Response
     if($this->request->isPost())
     {
         $newData = $this->request->getPost();
-        $updateFields = ['id','userid','capacity','model','branch'];
+        $updateFields = ['id','userid','capacity','model','branch','plate'];
 
         $truck = $this->model::findFirst([
             "conditions" => "id = ?0",
@@ -60,7 +61,7 @@ public function editTruck($id): Response
 }
 
 
-public function deleteTruck($id) : Response
+public function deleteTrucks($id) : Response
 {
     $truck = $this->model::findFirst([
         "conditions" => "id = ?0",
@@ -76,14 +77,18 @@ public function deleteTruck($id) : Response
 
 }
 
-public function getTrucks(): Response
-{
+    public function getTrucks(): Response{
+    
     $trucks = $this->model::find();
+
+    if(!$trucks){
+        throw new \Exception("There are no trucks");
+    }
 
     return $this->response($trucks);
 }
 
-public function getTruck($id){
+        public function getTruck($id){
     
             $truck = $this->model::findFirst([
                 "conditions" => "id = ?0",
