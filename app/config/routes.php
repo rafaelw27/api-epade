@@ -93,6 +93,11 @@ $router->post('/products', [
     'create',
 ]);
 
+$router->post('/products/{id}', [
+    'Epade\Controllers\ProductsController',
+    'edit',
+]);
+
 
 $router->mount();
 
