@@ -79,7 +79,7 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                         "name"=> "Inventory Asset"
                       ],
                       "TrackQtyOnHand" => true,
-                      "QtyOnHand"=> 10,
+                      "QtyOnHand"=> $request['quantity'],
                       "InvStartDate"=> $dateTime,
                 ]);
                  
@@ -111,6 +111,65 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                 
         }
 
+
+    }
+
+    /**
+     * Edits a specific product by its id
+     *
+     * @return Response
+     */
+    public function edit($id): Response
+    {
+        if($this->request->isPost()){
+
+        $request = $this->request->getPost();
+
+        if($apiItem = $this->quickbooks->Query("SELECT * FROM Item where Id= '{$id}'")){
+
+            $actualItem = reset($apiItem);
+            $updateItem = Item::update($actualItem, [
+                //If you are going to do a full Update, set sparse to false
+                'sparse' => 'true',
+                'Name' => $request['name'],
+                'FullyQualifiedName' => $request['full_name'],
+                'Description' => $request['description'],
+                'Active' => $request['active'],
+                'Type' => $request['type'],
+                'Taxable' =>$request['taxable'],
+                'UnitPrice' =>$request['unit_price'],
+                'QtyOnHand' => $request['quantity'],
+            ]);
+
+            if($resultUpdate = $this->quickbooks->Update($updateItem)){
+               
+                $ourProduct = $this->model::findFirst([
+                    "conditions" => "id = ?0",
+                    "bind" => [$id]
+                ]);
+
+                if(!$ourProduct){
+                    throw new \Exception("Product could not be found");
+                }
+
+                $ourProduct->name = $request['name'];
+                $ourProduct->full_name = $request['full_name'];
+                $ourProduct->description = $request['description'];
+                $ourProduct->active = $request['active'];
+                $ourProduct->type = $request['type'];
+                $ourProduct->taxable = $request['taxable'];
+                $ourProduct->maker = $request['maker'];
+                $ourProduct->unit_price = $request['unit_price'];
+                $ourProduct->unit_volume = $request['unit_volume'];
+                $ourProduct->quantity = $request['quantity'];
+
+                if($ourProduct->update()){
+                    return $this->response($ourProduct);
+                }
+            }
+        }
+
+        }
 
     }
 
