@@ -5,22 +5,34 @@ namespace Epade\Models;
 use Phalcon\Mvc\Model;
 use Exception;
 
-class Users extends Model
+class Products extends Model
 {
-    
+
     public $id;
 
-    public $user_type_id;
+    public $name;
 
-    public $first_name;
+    public $full_name;
 
-    public $last_name;
+    public $description;
 
-    public $email;
+    public $active;
 
-    public $password;
+    public $type;
 
-    public $phone;
+    public $taxable;
+
+    public $maker;
+
+    public $unit_price;
+
+    public $unit_volume;
+
+    public $quantity;
+
+    public $created_at;
+
+    public $updated_at;
 
     /**
      * Undocumented function
@@ -41,7 +53,9 @@ class Users extends Model
      */
     public function getSource()
     {
-        return 'users';
+        return 'products';
     }
+
+
 
 }

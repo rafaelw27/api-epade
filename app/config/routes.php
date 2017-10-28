@@ -17,6 +17,36 @@ $router->get('/', [
     'index',
 ]);
 
+# Trucks
+
+$router->get('/trucks', [
+    'Epade\Controllers\TrucksController',
+    'getTrucks',
+]);
+
+$router->get('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'getTruck',
+]);
+
+$router->post('/trucks', [
+    'Epade\Controllers\TrucksController',
+    'create',
+]);
+
+$router->post('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'editTruck',
+]);
+
+$router->delete('/trucks/{id}', [
+    'Epade\Controllers\TrucksController',
+    'deleteTrucks',
+]);
+
+
+
+
 # Users
 
 $router->get('/users', [
@@ -43,6 +73,36 @@ $router->delete('/users/{id}', [
     'Epade\Controllers\UsersController',
     'deleteUser',
 ]);
+
+# User Authentication
+
+$router->post('/login', [
+    'Epade\Controllers\UsersController',
+    'login',
+]);
+
+# Products
+
+$router->get('/products', [
+    'Epade\Controllers\ProductsController',
+    'index',
+]);
+
+$router->post('/products', [
+    'Epade\Controllers\ProductsController',
+    'create',
+]);
+
+$router->post('/products/{id}', [
+    'Epade\Controllers\ProductsController',
+    'edit',
+]);
+
+$router->delete('/products/{id}',[
+    'Epade\Controllers\ProductsController',
+    'delete',
+]);
+
 
 $router->mount();
 

@@ -35,7 +35,8 @@
         "symfony/var-dumper": "^3.0",
         "phpoffice/phpexcel": "^1.8",
         "league/csv": "^8.2",
-        "duncan3dc/fork-helper": "dev-master"
+        "duncan3dc/fork-helper": "dev-master",
+        "quickbooks/v3-php-sdk": "^3.4"
 
     }
 }

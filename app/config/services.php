@@ -12,6 +12,7 @@ use Phalcon\Logger;
 use Phalcon\Mvc\Model\Metadata\Files as MetaDataAdapter;
 use Phalcon\Mvc\Model\Metadata\Memory as MemoryMetaDataAdapter;
 use Zoho\CRM\ZohoClient;
+use QuickBooksOnline\API\DataService\DataService;
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
@@ -262,6 +263,25 @@ $di->set('zoho', function () use ($config) {
     $zohoClient = new ZohoClient(getenv('ZOHO_DEFAULT_KEY'));
 
     return $zohoClient;
+});
+
+/**
+ * Quickbooks
+ */
+$di->set('quickbooks', function () use ($config) {
+    $dataService = DataService::Configure(array(
+        'auth_mode' => 'oauth2',
+        'ClientID' => getenv('CLIENT_ID'),
+        'ClientSecret' => getenv('CLIENT_SECRET'),
+        'accessTokenKey' => getenv('ACCESS_TOKEN_KEY'),
+        'refreshTokenKey' => getenv('REFRESH_TOKEN_KEY'),
+        'QBORealmID' => getenv('QBO_REALM_ID'),
+        'baseUrl' => getenv('BASE_URL')
+    ));
+
+    $dataService->disableLog();
+
+    return $dataService;
 });
 
 /**
