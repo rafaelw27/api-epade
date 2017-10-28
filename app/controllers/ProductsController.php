@@ -59,7 +59,7 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                 $productAPI = Item::create([
                       "Name" => $request['name'] ,
                       "Description" => $request['description'],
-                      "Active" => $request['active'],
+                      "Active" => true,
                       "FullyQualifiedName" => $request['full_name'],
                       "Taxable" => $request['taxable'],
                       "UnitPrice" => $request['unit_price'],
@@ -134,7 +134,6 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                 'Name' => $request['name'],
                 'FullyQualifiedName' => $request['full_name'],
                 'Description' => $request['description'],
-                'Active' => $request['active'],
                 'Type' => $request['type'],
                 'Taxable' =>$request['taxable'],
                 'UnitPrice' =>$request['unit_price'],
@@ -155,7 +154,6 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                 $ourProduct->name = $request['name'];
                 $ourProduct->full_name = $request['full_name'];
                 $ourProduct->description = $request['description'];
-                $ourProduct->active = $request['active'];
                 $ourProduct->type = $request['type'];
                 $ourProduct->taxable = $request['taxable'];
                 $ourProduct->maker = $request['maker'];
@@ -173,6 +171,14 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
 
     }
 
+    /**
+     * Delete a specific product by its id from Quickbooks and our DB
+     * 
+     * Note: Products with Active = "false", cannot be changed to active, so it's definitive
+     *
+     * @param [type] $id
+     * @return Response
+     */
     public function delete($id) : Response
     {
         if($apiItem = $this->quickbooks->Query("SELECT * FROM Item where Id= '{$id}'")){
@@ -200,6 +206,8 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
                             if($ourProduct->update()){
                                 return $this->response($ourProduct);
                             }   
-    }
+                }
         }
+
+    }
 }
