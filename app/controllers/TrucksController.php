@@ -1,46 +1,64 @@
 <?php
 namespace Epade\Controllers;
+
 use Epade\Models\Trucks;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 
 class TrucksController extends \Baka\Http\Rest\CrudExtendedController
 {
-    public function onContruct() : void
+     /**
+     * set objects
+     *
+     * @return void
+     */
+    public function onConstruct(): void
     {
         $this->model = new Trucks();
     }
 
-public function create() : Response
-{
-    $truck = $this->model->save(
-        $this->request->getPost(),
-        ["id",
-        "user_id",
-        "capacity",
-        "model",
-        "brand",
-        "plate"
-        ]
-
-    );
-
-    if(!$truck)
+    /**
+     * Creates a truck
+     *
+     * @return Response
+     */
+    public function create() : Response
     {
-        throw new Exception ("Truck could not be created.");
+        if($this->request->isPost()){
 
+        $truck = $this->model->save(
+            $this->request->getPost(),
+            [
+                "user_id",
+                "brand",
+                "model",
+                "capacity",
+                "plate"
+            ]);
+
+        if(!$truck)
+        {
+            throw new Exception ("Truck could not be created.");
+
+        }
+
+        return $this->response("Truck Created.");
+        }
+    
     }
 
-    return $this->response("Truck Created.");
-    
-}
-
-public function editTruck($id): Response
+/**
+ * Edits a specific truck based on id
+ *
+ * @param [int] $id
+ * @return Response
+ */
+public function edit($id): Response
 {
     if($this->request->isPost())
     {
         $newData = $this->request->getPost();
-        $updateFields = ['id','userid','capacity','model','branch','plate'];
+        $updateFields = ['user_id','brand','model','capacity','plate'];
 
         $truck = $this->model::findFirst([
             "conditions" => "id = ?0",
@@ -60,8 +78,13 @@ public function editTruck($id): Response
     }
 }
 
-
-public function deleteTrucks($id) : Response
+/**
+ * Deletes a specific truck based on id
+ *
+ * @param [type] $id
+ * @return Response
+ */
+public function delete($id) : Response
 {
     $truck = $this->model::findFirst([
         "conditions" => "id = ?0",
@@ -77,7 +100,12 @@ public function deleteTrucks($id) : Response
 
 }
 
-    public function getTrucks(): Response{
+/**
+ * Fetches all trucks
+ *
+ * @return Response
+ */
+public function getTrucks(): Response{
     
     $trucks = $this->model::find();
 
@@ -88,15 +116,26 @@ public function deleteTrucks($id) : Response
     return $this->response($trucks);
 }
 
-        public function getTruck($id){
+/**
+ * Fetches a specific truck based on id
+ *
+ * @param [int] $id
+ * @return Response
+ */
+public function getTruck($id): Response{
     
-            $truck = $this->model::findFirst([
-                "conditions" => "id = ?0",
-                "bind" =>[$id],
-            ]);
-            
-            return $this->response($truck);
-        }
+    
+    $truck = $this->model::findFirst([
+        "conditions" => "id = ?0",
+        "bind" =>[$id],
+    ]);
+
+    if(!$truck){
+        throw new \Exception('Truck not found');
+    }
+    
+    return $this->response($truck);
+}
   
 
 

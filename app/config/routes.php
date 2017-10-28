@@ -36,12 +36,12 @@ $router->post('/trucks', [
 
 $router->post('/trucks/{id}', [
     'Epade\Controllers\TrucksController',
-    'editTruck',
+    'edit',
 ]);
 
 $router->delete('/trucks/{id}', [
     'Epade\Controllers\TrucksController',
-    'deleteTrucks',
+    'delete',
 ]);
 
 
@@ -66,12 +66,12 @@ $router->post('/users', [
 
 $router->post('/users/{id}', [
     'Epade\Controllers\UsersController',
-    'editUser',
+    'edit',
 ]);
 
 $router->delete('/users/{id}', [
     'Epade\Controllers\UsersController',
-    'deleteUser',
+    'delete',
 ]);
 
 # User Authentication
