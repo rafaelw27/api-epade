@@ -103,6 +103,17 @@ $router->delete('/products/{id}',[
     'delete',
 ]);
 
+$router->get('/products/{id}',[
+    'Epade\Controllers\ProductsController',
+    'getProduct',
+]);
+
+$router->get('/products',[
+    'Epade\Controllers\ProductsController',
+    'getProducts',
+]);
+
+
 
 $router->mount();
 
