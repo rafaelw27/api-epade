@@ -1,8 +1,8 @@
 <?php
 
 namespace Epade\Models;
-use Phalcon\Mvc\Model;
 
+use Phalcon\Mvc\Model;
 use Exception;
 
 class Trucks extends Model
@@ -21,7 +21,7 @@ class Trucks extends Model
     public $plate;
 
     /**
-     * Undocumented function
+     * Initializer
      *
      * @return void
      */
@@ -43,4 +43,3 @@ class Trucks extends Model
     }
 
 }
-

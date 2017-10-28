@@ -28,8 +28,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
      */
     public function create(): Response 
     {
-
-
+        if($this->request->isPost()){
             $user = $this->model->save(
                 $this->request->getPost(),
                 [
@@ -39,14 +38,15 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
                     "email",
                     "password",
                     "phone",
-                ]
-            );
+                ]);
 
             if(!$user){
                 throw new Exception("User could not be created");
             }
 
             return $this->response('User created');
+
+        }
 
 
     }
@@ -56,7 +56,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
      *
      * @return void
      */
-    public function editUser($id): Response{
+    public function edit($id): Response{
 
         if($this->request->isPost()){
             
@@ -87,7 +87,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
      *
      * @return void
      */
-    public function deleteUser($id): Response{
+    public function delete($id): Response{
 
         $user = $this->model::findFirst([
             "conditions" => "id = ?0",
