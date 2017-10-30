@@ -6,40 +6,40 @@ Here are the entities that are currently in use in our database
 ### Products 
 **Fields**
 
-..* id
-..* name
-..* full_name
-..* description
-..* active
-..* type
-..*taxable
-..* maker
-..* unit_price
-..* unit_volume
-..* quantity
+* id
+* name
+* full_name
+* description
+* active
+* type
+* taxable
+* maker
+* unit_price
+* unit_volume
+* quantity
 
 ### Users
 **Fields**
 
--id
--user_type_id
--first_name
--last_name
--email
--password
--phone
+* id
+* user_type_id
+* first_name
+* last_name
+* email
+* password
+* phone
 
 
 
 ### Trucks
 **Fields**
 
--id
--user_id
--brand
--model
--capacity
--plate
+* id
+* user_id
+* brand
+* model
+* capacity
+* plate
 
 ## Routes
 
