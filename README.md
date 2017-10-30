@@ -3,8 +3,8 @@
 
 Here are the entities that are currently in use in our database
 
-Products:
-Fields
+###Products 
+**Fields**
 
 -id
 -name
@@ -18,8 +18,8 @@ Fields
 -unit_volume
 -quantity
 
-Users
-Fields
+### Users
+**Fields**
 
 -id
 -user_type_id
@@ -31,8 +31,8 @@ Fields
 
 
 
-Trucks
-Fields
+### Trucks
+**Fields**
 
 -id
 -user_id
@@ -41,11 +41,11 @@ Fields
 -capacity
 -plate
 
-Routes
+## Routes
 
-Truck Routes
+###Truck Routes
 
-Get all Trucks:
+**Get all Trucks:**
 $router->get('/trucks', [
     'Epade\Controllers\TrucksController',
     'getTrucks',
@@ -53,7 +53,7 @@ $router->get('/trucks', [
 
 This route will return all Trucks that are currently in the Database.
 
-Get Truck: 
+**Get Truck:** 
 $router->get('/trucks/{id}', [
     'Epade\Controllers\TrucksController',
     'getTruck',
@@ -61,12 +61,7 @@ $router->get('/trucks/{id}', [
 
 This route will return a specific truck based on a given id.
 
-
-
-
-
-
-Create Truck:
+**Create Truck:**
 $router->post('/trucks', [
     'Epade\Controllers\TrucksController',
     'create',
@@ -74,7 +69,7 @@ $router->post('/trucks', [
 
 This route will enable you to create a truck on the database. You will have to provide the required fields of a truck to be able to create it.
 
-Update Truck:
+**Update Truck:**
 $router->post('/trucks/{id}', [
     'Epade\Controllers\TrucksController',
     'edit',
@@ -82,7 +77,7 @@ $router->post('/trucks/{id}', [
 
 This route will let you update or edit an existing truck based on a given id.
 
-Delete Truck:
+**Delete Truck:**
 $router->delete('/trucks/{id}', [
     'Epade\Controllers\TrucksController',
     'delete',
@@ -90,9 +85,9 @@ $router->delete('/trucks/{id}', [
 
 This route will let you delete an existing truck based on a given id.
 
-Users Routes
+### Users Routes
 
-Get all Users:
+**Get all Users:**
 $router->get('/users', [
     'Epade\Controllers\UsersController',
     'getUsers',
@@ -100,12 +95,7 @@ $router->get('/users', [
 
 This route will return all existing users in the database.
 
-
-
-
-
-
-Get User:
+**Get User:**
 $router->get('/users/{id}', [
     'Epade\Controllers\UsersController',
     'getUser',
@@ -114,7 +104,7 @@ $router->get('/users/{id}', [
 This route will return an existing user of the database based on a specific id.
 
 
-Get User:
+**Get User:**
 $router->get('/users/{id}', [
     'Epade\Controllers\UsersController',
     'getUser',
@@ -122,7 +112,7 @@ $router->get('/users/{id}', [
 
 This route will return an existing user of the database.
 
-Create User:
+**Create User:**
 $router->post('/users', [
     'Epade\Controllers\UsersController',
     'create',
@@ -130,7 +120,7 @@ $router->post('/users', [
 
 This route will enable you to create a user on the database. You will have to provide the required fields of a user to be able to create it.
 
-Update User:
+**Update User:**
 $router->post('/users/{id}', [
     'Epade\Controllers\UsersController',
     'edit',
@@ -138,15 +128,16 @@ $router->post('/users/{id}', [
 
 This route will let you update or edit an existing user based on a given id.
 
-Delete User:
+**Delete User:**
 $router->delete('/users/{id}', [
     'Epade\Controllers\UsersController',
     'delete',
 ]);
 This route will let you delete an existing user based on a given id.
-Products Routes
 
-Get All Products:
+### Products Routes
+
+**Get All Products:**
 $router->get('/products',[
     'Epade\Controllers\ProductsController',
     'getProducts',
@@ -154,7 +145,7 @@ $router->get('/products',[
 
 This route will return all products on the database.
 
-Get Product:
+**Get Product:**
 $router->get('/products/{id}',[
     'Epade\Controllers\ProductsController',
     'getProduct',
@@ -162,14 +153,15 @@ $router->get('/products/{id}',[
 
 This route will return a product based on a specific id.
 
-Create Product:
+**Create Product:**
 $router->post('/products', [
     'Epade\Controllers\ProductsController',
     'create',
 ]);
 
 This route will enable you to create a product on the database. You will have to provide the required fields of a product to be able to create it.
-Update Product:
+
+**Update Product:**
 $router->post('/products/{id}', [
     'Epade\Controllers\ProductsController',
     'edit',
@@ -177,15 +169,16 @@ $router->post('/products/{id}', [
 
 This route will let you update a user based on a specific id.
 
-Delete Product:
+**Delete Product:**
 $router->delete('/products/{id}',[
     'Epade\Controllers\ProductsController',
     'delete',
 ]);
 This route will let you delete a user based on a specific id.
-Login Route
 
-Login:
+### Login Route
+
+**Login:**
 $router->post('/login', [
     'Epade\Controllers\UsersController',
     'login',
