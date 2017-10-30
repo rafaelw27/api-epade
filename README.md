@@ -43,6 +43,8 @@ Here are the entities that are currently in use in our database
 
 ## Routes
 
+This routes will enable you to connect to our database and perform functions.
+
 ### Truck Routes
 
 **Get all Trucks:**
