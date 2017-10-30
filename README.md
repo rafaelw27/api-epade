@@ -1,5 +1,5 @@
-EPADE Project
-Entities & Fields
+# EPADE Project
+## Entities & Fields
 
 Here are the entities that are currently in use in our database
 
