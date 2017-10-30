@@ -3,7 +3,7 @@
 
 Here are the entities that are currently in use in our database
 
-###Products 
+### Products 
 **Fields**
 
 -id
@@ -43,7 +43,7 @@ Here are the entities that are currently in use in our database
 
 ## Routes
 
-###Truck Routes
+### Truck Routes
 
 **Get all Trucks:**
 $router->get('/trucks', [
