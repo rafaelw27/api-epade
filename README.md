@@ -6,17 +6,17 @@ Here are the entities that are currently in use in our database
 ### Products 
 **Fields**
 
--id
--name
--full_name
--description
--active
--type
--taxable
--maker
--unit_price
--unit_volume
--quantity
+..* id
+..* name
+..* full_name
+..* description
+..* active
+..* type
+..*taxable
+..* maker
+..* unit_price
+..* unit_volume
+..* quantity
 
 ### Users
 **Fields**
@@ -102,15 +102,6 @@ $router->get('/users/{id}', [
 ]);
 
 This route will return an existing user of the database based on a specific id.
-
-
-**Get User:**
-$router->get('/users/{id}', [
-    'Epade\Controllers\UsersController',
-    'getUser',
-]);
-
-This route will return an existing user of the database.
 
 **Create User:**
 $router->post('/users', [
