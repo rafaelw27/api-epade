@@ -210,4 +210,45 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
         }
 
     }
+
+    /**
+     * Fetches a specific product based on id
+     *
+     * @param [int] $id
+     * @return Response
+     */
+    public function getProduct($id) : Response
+    {
+        $product = $this->model::findFirst([
+            "conditions" => "id = ?0 AND active = 'true'",
+            "bind" =>[$id],
+        ]);
+
+        if(!$product)
+        {
+            throw new \Exception("No product found");
+        }
+        
+        return $this->response($product);
+
+    }
+
+    /**
+     * Fetches all products
+     *
+     * @return Response
+     */
+    public function getProducts() : Response
+    {
+        $products = $this->model::find([
+            "conditions" => "active = 'true'"
+        ]);
+        
+        if(!$products){
+            throw new \Exception("There are no Products");
+        }
+        
+        return $this->response($products);
+
+    }
 }
