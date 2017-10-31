@@ -113,7 +113,24 @@ $router->get('/products',[
     'getProducts',
 ]);
 
+#Vendor --> Vendedores
 
+$router->get('/vendors',[
+    'Epade\Controllers\VendorsController',
+    'getVendors',
+]);
+
+$router->get('/vendors/{id}',[
+    'Epade\Controllers\VendorsController',
+    'getVendor',
+]);
+
+#to Sync all vendors in our database
+
+$router->get('/vendors/quickbooks',[
+    'Epade\Controllers\VendorsController',
+    'saveVendorsToDb',
+]);
 
 $router->mount();
 
