@@ -149,6 +149,11 @@ This route will let you delete a user based on a specific id.
 
 **Login:**
 
+<<<<<<< HEAD
 POST http://api-epade.io/login
 
 This is the route for the Login. The required fields for login are: email and password.
+=======
+This is the route for the Login.
+
+>>>>>>> 3247fa4bad82543e440b2c7df0c6638d5aa17f07
