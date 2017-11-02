@@ -2,7 +2,6 @@
 
 namespace Epade\Controllers;
 
-
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use Epade\Models\Vendors;
@@ -10,21 +9,28 @@ use Epade\Models\Users;
 use QuickBooksOnline\API\Facades\Employee;
 use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 
-
 class VendorsController extends \Baka\Http\Rest\CrudExtendedController
 {
+    /**
+     * set objects
+     *
+     * @return void
+     */
+    public function onConstruct(): void
+    {
+        $this->model = new Vendors();
+    }
 
     /**
      * Saves all vendors(employees) in our database
      *@todo No se esta salvando en vendors de  nuestra base de datos
      * @return Response
      */
-    public function saveVendorsToDb():Response {
+    public function saveVendorsToDb():Response
+    {
 
-        if($apiVendors = $this->quickbooks->Query("SELECT * FROM Employee"))
-        {
+        if ($apiVendors = $this->quickbooks->Query("SELECT * FROM Employee")) {
             foreach ($apiVendors as $apiVendor) {
-
                 $vendor = new Vendors();
                 $vendor->id = $apiVendor->Id;
                 $vendor->first_name = $apiVendor->GivenName;
@@ -33,7 +39,7 @@ class VendorsController extends \Baka\Http\Rest\CrudExtendedController
                 $vendor->phone = (string)$apiVendor->PrimaryPhone->FreeFormNumber;
                 $vendor->email =(string) $apiVendor->PrimaryEmailAddr->Address;
 
-                if($vendor->save()){
+                if ($vendor->save()) {
                     $user = new Users();
                     $user->id = $apiVendor->Id;
                     $user->user_type_id = 2;
@@ -43,13 +49,11 @@ class VendorsController extends \Baka\Http\Rest\CrudExtendedController
                     $user->password = "placeholder";
                     $user->phone = (string)$apiVendor->PrimaryPhone->FreeFormNumber;
                     $user->save();
-
                 }
             }
 
             return $this->response("All vendors from Quickbooks added");
         }
-
     }
 
     /**
@@ -59,26 +63,15 @@ class VendorsController extends \Baka\Http\Rest\CrudExtendedController
      */
     public function getVendors(): Response
     {
-        if($apiVendors = $this->quickbooks->Query("SELECT * FROM Employee"))
-        {
-            $vendors = [];
-            $vendor= [];
-            foreach ($apiVendors as $apiVendor) {
-
-                $vendor['id'] = $apiVendor->Id;
-                $vendor['first_name'] = $apiVendor->GivenName;
-                $vendor['last_name'] = $apiVendor->FamilyName;
-                $vendor['active'] = $apiVendor->Active;
-                $vendor['phone'] = $apiVendor->PrimaryPhone->FreeFormNumber;
-                $vendor['email'] = $apiVendor->PrimaryEmailAddr->Address;
-
-                $vendors[]= $vendor;
-            }
-            return $this->response($vendors);
-        }
-
-
+        $vendors = $this->model::find([
+            "conditions" => "active = 'true'"
+        ]);
         
+        if (!$vendors) {
+            throw new \Exception("There are no vendors");
+        }
+        
+        return $this->response($vendors);
     }
 
     /**
@@ -88,22 +81,15 @@ class VendorsController extends \Baka\Http\Rest\CrudExtendedController
      */
     public function getVendor($id):Response
     {
-        if($apiVendors = $this->quickbooks->Query("SELECT * FROM Employee where Id= '{$id}'"))
-        {
-            $vendor = [];
-            foreach ($apiVendors as $apiVendor) {
+        $vendor = $this->model::findFirst([
+            "conditions" => "id = ?0 AND active = 'true'",
+            "bind" =>[$id],
+        ]);
 
-                $vendor['id'] = $apiVendor->Id;
-                $vendor['first_name'] = $apiVendor->GivenName;
-                $vendor['last_name'] = $apiVendor->FamilyName;
-                $vendor['active'] = $apiVendor->Active;
-                $vendor['phone'] = $apiVendor->PrimaryPhone->FreeFormNumber;
-                $vendor['email'] = $apiVendor->PrimaryEmailAddr->Address;
-                
-            }
-            return $this->response($vendor);
+        if (!$vendor) {
+            throw new \Exception("No vendor found");
         }
-
+        
+        return $this->response($vendor);
     }
-
 }
