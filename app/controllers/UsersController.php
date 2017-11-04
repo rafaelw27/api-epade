@@ -127,8 +127,21 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
             "conditions" => "id = ?0",
             "bind" =>[$id],
         ]);
-        
-        return $this->response($user);
+
+        $userType = TypeUsers::findFirst([
+            "conditions" => "id = ?0",
+            "bind" => [$user->user_type_id]
+        ]);
+
+        $userData = [];
+
+        foreach ($user as $key => $value) {
+            $userData[$key] = $value;
+        }
+
+        $userData['user_type_name'] = $userType->name;
+            
+        return $this->response($userData);
     }
 
     /**
