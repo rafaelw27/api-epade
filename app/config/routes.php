@@ -44,8 +44,32 @@ $router->delete('/trucks/{id}', [
     'delete',
 ]);
 
+#Drivers
 
+$router->get('/drivers', [
+    'Epade\Controllers\DriversController',
+    'getDrivers',
+]);
 
+$router->get('/drivers/{id}', [
+    'Epade\Controllers\DriversController',
+    'getDriver',
+]);
+
+$router->post('/drivers', [
+    'Epade\Controllers\DriversController',
+    'create',
+]);
+
+$router->post('/drivers/{id}', [
+    'Epade\Controllers\DriversController',
+    'edit',
+]);
+
+$router->delete('/drivers/{id}', [
+    'Epade\Controllers\DriversController',
+    'delete',
+]);
 
 # Users
 
