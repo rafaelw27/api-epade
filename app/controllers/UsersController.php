@@ -29,6 +29,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
     public function create(): Response 
     {
         if($this->request->isPost()){
+            
             $user = $this->model->save(
                 $this->request->getPost(),
                 [
@@ -155,6 +156,17 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
 
             $email = $this->request->getPost('email','string');
             $password = $this->request->getPost('password','string');
+    
+            //If data comes from mobile app
+            if($this->request->getContentType()){
+
+            $rawData = $this->request->getRawBody();
+            $jsonData = json_decode($rawData);
+            
+            $email = $jsonData->email;
+            $password = $jsonData->password;
+
+            }
         
             $user = $this->model::findFirst([
                 "conditions" => "email = ?0 AND password = ?1",
