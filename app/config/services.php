@@ -13,6 +13,7 @@ use Phalcon\Mvc\Model\Metadata\Files as MetaDataAdapter;
 use Phalcon\Mvc\Model\Metadata\Memory as MemoryMetaDataAdapter;
 use Zoho\CRM\ZohoClient;
 use QuickBooksOnline\API\DataService\DataService;
+use Phalcon\Session\Adapter\Files as Session;
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
@@ -90,6 +91,20 @@ $di->set('db', function () use ($config, $di) {
 
     return $connection;
 });
+
+/**
+ * Sessions
+ */
+$di->setShared(
+    "session",
+    function () {
+        $session = new Session();
+
+        $session->start();
+
+        return $session;
+    }
+);
 
 /**
  * Redis configuration
