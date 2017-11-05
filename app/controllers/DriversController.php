@@ -29,20 +29,20 @@ class DriversController extends \Baka\Http\Rest\CrudExtendedController
         $driver = $this->model->save(
             $this->request->getPost(),
             [
-                "id",
-                "name",
+                "first_name",
                 "last_name",
                 "phone",
+                "email",
                 
             ]);
 
         if(!$driver)
         {
-            throw new Exception ("Driver could not be created.");
+            throw new Exception ("Driver could not be created");
 
         }
 
-        return $this->response("Driver Created.");
+        return $this->response("Driver Created");
         }
     
     }
@@ -58,16 +58,16 @@ public function edit($id): Response
     if($this->request->isPost())
     {
         $newData = $this->request->getPost();
-        $updateFields = ['id','name','last_name','phone'];
+        $updateFields = ['first_name','last_name','phone','email'];
 
-        $truck = $this->model::findFirst([
+        $driver = $this->model::findFirst([
             "conditions" => "id = ?0",
             "bind" => [$id]
         ]);
 
 
         if(!$driver){
-            throw new \Exception("Driver not found.");
+            throw new \Exception("Driver not found");
         }
 
         if(!$driver->save($newData,$updateFields)){
@@ -93,10 +93,10 @@ public function delete($id) : Response
 
     if(!$driver->delete())
     {
-        throw new \Exception("Driver not found.");
+        throw new \Exception("Driver not found");
     }
 
-    return $this->response("Driver Deleted.");
+    return $this->response("Driver Deleted");
 
 }
 
@@ -107,13 +107,13 @@ public function delete($id) : Response
  */
 public function getDrivers(): Response{
     
-    $driver = $this->model::find();
+    $drivers = $this->model::find();
 
-    if(!$driver){
+    if(!$drivers){
         throw new \Exception("There are no drivers");
     }
 
-    return $this->response($driver);
+    return $this->response($drivers);
 }
 
 /**

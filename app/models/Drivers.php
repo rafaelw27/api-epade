@@ -10,12 +10,14 @@ class Drivers extends Model
     
     public $id;
 
-    public $name;
+    public $first_name;
 
     public $last_name;
 
     public $phone;
 
+    public $email;
+    
     /**
      * Initializer
      *
