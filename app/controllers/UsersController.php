@@ -154,17 +154,20 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
 
         if($this->request->isPost()){
 
-            $email = $this->request->getPost('email','string');
-            $password = $this->request->getPost('password','string');
-    
-            //If data comes from mobile app
-            if($this->request->getContentType()){
-
             $rawData = $this->request->getRawBody();
             $jsonData = json_decode($rawData);
             
             $email = $jsonData->email;
             $password = $jsonData->password;
+
+            // $email = $this->request->getPost('email','string');
+            // $password = $this->request->getPost('password','string');
+
+            //If data comes from mobile app
+            if($this->request->getContentType() == "application/x-www-form-urlencoded"){
+
+                $email = $this->request->getPost('email','string');
+                $password = $this->request->getPost('password','string');
 
             }
         
@@ -182,6 +185,10 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
                 "bind" => [$user->user_type_id]
             ]);
 
+            if(!$this->session->has("id")){
+                $this->session->set("id", $user->id);
+            }
+
             $userData = [];
 
             foreach ($user as $key => $value) {
@@ -189,10 +196,29 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
             }
 
             $userData['user_type_name'] = $userType->name;
+            $userData['session_status'] = "Active " . $this->session->get("id"); 
                 
             return $this->response($userData);
 
         }
+    }
+
+    /**
+     * Log out 
+     *
+     * @return void
+     */
+    public function logout(): Response
+    {
+
+        if($this->request->isPost()){
+
+            // Destroy the whole session
+             $this->session->destroy();
+
+             return $this->response("Session Destroyed");
+        }
+        
     }
 
 

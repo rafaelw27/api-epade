@@ -10,6 +10,8 @@ class Reports extends Model
 
     public $id;
 
+    public $user_id;
+
     public $title;
 
     public $description;

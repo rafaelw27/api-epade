@@ -105,6 +105,11 @@ $router->post('/login', [
     'login',
 ]);
 
+$router->post('/logout', [
+    'Epade\Controllers\UsersController',
+    'logout',
+]);
+
 # Products
 
 $router->get('/products', [
