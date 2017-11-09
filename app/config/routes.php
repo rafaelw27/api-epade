@@ -205,6 +205,13 @@ $router->get('/routes/{id}', [
     'getRoute',
 ]);
 
+#Orders
+
+$router->post('/orders', [
+    'Epade\Controllers\OrdersController',
+    'create',
+]);
+
 
 
 #to Sync all vendors in our database
