@@ -44,6 +44,33 @@ $router->delete('/trucks/{id}', [
     'delete',
 ]);
 
+#Reports
+
+$router->get('/reports', [
+    'Epade\Controllers\ReportsController',
+    'getReports',
+]);
+
+$router->get('/reports/{id}', [
+    'Epade\Controllers\ReportsController',
+    'getReport',
+]);
+
+$router->post('/reports', [
+    'Epade\Controllers\ReportsController',
+    'create',
+]);
+
+$router->post('/reports/{id}', [
+    'Epade\Controllers\ReportsController',
+    'edit',
+]);
+
+$router->delete('/reports/{id}', [
+    'Epade\Controllers\ReportsController',
+    'delete',
+]);
+
 #Drivers
 
 $router->get('/drivers', [

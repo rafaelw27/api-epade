@@ -79,5 +79,50 @@ class ReportsController extends \Baka\Http\Rest\CrudExtendedController{
 
         }
     }
+
+    public function delete($id) : Response
+    {
+        $report = $this->model::findFirst([
+            "conditions" => "id = ?0",
+            "bind" =>[$id],
+        ]);
+    
+        if(!$report->delete())
+        {
+            throw new \Exception("Report not found.");
+        }
+    
+        return $this->response("Report Deleted.");
+    }
+
+    public function getReports() : Response
+    {
+        $reports = $this->model::find();
+        
+            if(!$reports){
+                throw new \Exception("There are no Reports");
+            }
+        
+            return $this->response($reports);
+    }
+
+    public function getReport($id) : Response
+    {
+        $report = $this->model::findFirst([
+            "conditions" => "id = ?0",
+            "bind" =>[$id],
+        ]);
+    
+        if(!$report){
+            throw new \Exception('Report not found');
+        }
+        
+        return $this->response($report);
+    }
+
+
+
+
+
     
 }
