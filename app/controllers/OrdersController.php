@@ -7,9 +7,11 @@ use Epade\Models\Orders;
 use Epade\Models\OrdersProducts;
 use Epade\Models\Clients;
 use Epade\Models\Trucks;
+use Epade\Models\Drivers;
+use Epade\Models\Routes;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
-use QuickBooksOnline\API\Facades\Item;
+use QuickBooksOnline\API\Facades\Invoice;
 use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 
 class OrdersController extends \Baka\Http\Rest\CrudExtendedController
@@ -26,7 +28,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
     /**
      * Creates a new order
-     *
+     *@todo Reparar el error que tenemos cuando creamos un Invoice nuevo en Quickbooks
      * @return Response
      */
     public function create() :Response
@@ -63,6 +65,16 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 throw new \Exception("Client not found");
             }
 
+            $routeObj = Routes::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$client->route_id]
+            ]);
+
+            if (!$routeObj) {
+                throw new \Exception("Client not found");
+            }
+
+
             $route_id = $client->route_id;
             $created_at = date("Y-m-d h:i:s");
 
@@ -73,11 +85,15 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             $newOrder->created_at = $created_at;
 
             if ($newOrder->save()) {
+
                 //Paso 2: Obtener y dar formato a los productos de la orden
                 $totalAmount = 0;
                 $totalVolume = 0;
                 $products = explode(',', $stringProducts);
                 $quantities = explode(',', $stringQuantity);
+                $productsArray = [];
+                $productArray = [];
+
 
                 //Posible solucion: Array Asociativo [product_id] => quantity
                 foreach ($products as $product) {
@@ -86,15 +102,36 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                         "bind" => [$product]
                     ]);
 
+                
                     if ($dbProduct) {
                         foreach ($quantities as $productQuantity) {
                             $totalAmount += $this->calculateTotalAmount($productQuantity, $dbProduct->unit_price);
         
                             $totalVolume += $this->calculateTotalProductVolume($productQuantity, $dbProduct->unit_volume);
 
+                            //$productArray['Id'] = $dbProduct->id;
+                            $productArray['Description'] = $dbProduct->description;
+                            $productArray['Amount'] = $dbProduct->unit_price * $productQuantity ;
+                            $productArray['DetailType'] = "SalesItemLineDetail";
+                            $productArray['SalesItemLineDetail'] = [
+                                "UnitPrice" => $dbProduct->unit_price,
+                                "Qty"=> $productQuantity,
+                                "ItemRef" => [
+                                    "value" => (string)$dbProduct->id,
+                                    "name" => $dbProduct->name
+                                ],
+                            ];
+                           
+                            //$productArray['TotalAmt'] = $totalAmount; //Later make function for total amount of all products
+
                             break;//For now
                         }
                     }
+
+                    $productsArray[] = $productArray;
+
+                //    print_r(gettype($client_id));
+                //     die();
                 }
 
                 //Paso 4 comparar volumen total de productos con camiones
@@ -112,9 +149,52 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                 //Paso 5: Asignar un chofer
 
-                print_r($truck->toArray());
+                $drivers = Drivers::find();
+                $driversCount = count($drivers);
+                
+                //Now we choose a random drivers from database
+                $randomDriver = rand(1,$driversCount);
+                $selectDriver = Drivers::findFirst([
+                    "conditions" => "id = ?0",
+                    "bind" => [$randomDriver]
+                ]);
 
+                //Paso 6: Insertar la orden en Quickbooks en la entidad Invoice
+                $orderApi = Invoice::create([
+                    //     "Deposit" => 0,
+                    //     "domain" => "QBO",
+                    //     "sparse" => false,
+                    //     "Id" =>$newOrder->id,
+                    // "ShipAddr"=> [
+                    //     "Id" => $routeObj->id,
+                    //     "Line1" => $routeObj->street,
+                    //     "City" => $routeObj->city,
+                    //     "Lat" => $routeObj->latitude,
+                    //     "Long" => $routeObj->longitude],
+                    // "TotalAmt" => $totalAmount,
+                    // "BillEmail" => [
+                    //     "Address"=> $client->email ], 
+                    "Line" => $productsArray,
+                    "CustomerRef"=>[
+                        "value"=> $client_id
+                    ]
+              ]);
+
+              if($resultingObj = $this->quickbooks->Add($orderApi)){
+                print_r("Orden creada en Quickbooks");
                 die();
+                
+              }
+              $error = $this->quickbooks->getLastError();
+              if ($error != null) {
+                echo "The Status code is: " . $error->getHttpStatusCode() . "\n";
+                echo "The Helper message is: " . $error->getOAuthHelperError() . "\n";
+                echo "The Response message is: " . $error->getResponseBody() . "\n";
+                echo "The Intuit Helper message is: IntuitErrorType:{" . $error->getIntuitErrorType() . "} IntuitErrorCode:{" . $error->getIntuitErrorCode() . "} IntuitErrorMessage:{" . $error->getIntuitErrorMessage() . "} IntuitErrorDetail:{" . $error->getIntuitErrorDetail() . "}";
+                } 
+
+
+             die();
             }
         }
     }
