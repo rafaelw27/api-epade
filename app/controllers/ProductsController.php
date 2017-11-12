@@ -16,7 +16,7 @@ class ProductsController extends \Baka\Http\Rest\CrudExtendedController{
      *
      * @return void
      */
-    public function index(): Response {
+    public function index($id = Null): Response {
 
         $CompanyInfo = $this->quickbooks->getCompanyInfo();
         $error = $this->quickbooks->getLastError();
