@@ -85,7 +85,24 @@ class ClientsController extends \Baka\Http\Rest\CrudExtendedController
         if (!$client) {
             throw new \Exception("No client found");
         }
+
+        $route = Routes::findFirst([
+            "conditions" => "id = ?0",
+            "bind" =>[$client->route_id],
+        ]);
         
-        return $this->response($client);
+        $clientData = [];
+        
+        foreach ($client as $key => $value) {
+            $clientData[$key] = $value;
+        }
+
+        $clientData['street']= $route->street;
+        $clientData['city']= $route->city;
+        $clientData['latitude'] = $route->latitude;
+        $clientData['longitude'] = $route->longitude;
+
+
+        return $this->response($clientData);
     }
 }
