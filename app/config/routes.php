@@ -17,6 +17,12 @@ $router->get('/', [
     'index',
 ]);
 
+$router->get('/refresh', [
+    'Epade\Controllers\IndexController',
+    'refreshToken',
+]);
+
+
 # Trucks
 
 $router->get('/trucks', [

@@ -85,7 +85,6 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             $newOrder->created_at = $created_at;
 
             if ($newOrder->save()) {
-
                 //Paso 2: Obtener y dar formato a los productos de la orden
                 $totalAmount = 0;
                 $totalVolume = 0;
@@ -153,48 +152,52 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 $driversCount = count($drivers);
                 
                 //Now we choose a random drivers from database
-                $randomDriver = rand(1,$driversCount);
+                $randomDriver = rand(1, $driversCount);
                 $selectDriver = Drivers::findFirst([
                     "conditions" => "id = ?0",
                     "bind" => [$randomDriver]
                 ]);
 
+                print_r($newOrder->id);
+
                 //Paso 6: Insertar la orden en Quickbooks en la entidad Invoice
                 $orderApi = Invoice::create([
-                    //     "Deposit" => 0,
-                    //     "domain" => "QBO",
-                    //     "sparse" => false,
-                    //     "Id" =>$newOrder->id,
-                    // "ShipAddr"=> [
-                    //     "Id" => $routeObj->id,
-                    //     "Line1" => $routeObj->street,
-                    //     "City" => $routeObj->city,
-                    //     "Lat" => $routeObj->latitude,
-                    //     "Long" => $routeObj->longitude],
-                    // "TotalAmt" => $totalAmount,
-                    // "BillEmail" => [
-                    //     "Address"=> $client->email ], 
+                        "Deposit" => 0,
+                        "domain" => "QBO",
+                        "sparse" => false,
+                    "ShipAddr"=> [
+                        "Id" =>(string)$routeObj->id,
+                        "Line1" => $routeObj->street,
+                        "City" => $routeObj->city,
+                        "Lat" => $routeObj->latitude,
+                        "Long" => $routeObj->longitude],
+                        "TotalAmt" => $totalAmount,
+                        "BillEmail" => [
+                        "Address"=> $client->email ],
                     "Line" => $productsArray,
                     "CustomerRef"=>[
                         "value"=> $client_id
-                    ]
-              ]);
+                    ],
+                    //"Id" => "235", Parece que no se puede asignar Id a una orden nueva
+                ]);
 
-              if($resultingObj = $this->quickbooks->Add($orderApi)){
-                print_r("Orden creada en Quickbooks");
-                die();
+                if ($resultingObj = $this->quickbooks->Add($orderApi)) {
+                    print_r($resultingObj);
+                    die();
+                }
+                $error = $this->quickbooks->getLastError();
+                if ($error != null) {
+                    echo "The Status code is: " . $error->getHttpStatusCode() . "\n";
+                    echo "The Helper message is: " . $error->getOAuthHelperError() . "\n";
+                    echo "The Response message is: " . $error->getResponseBody() . "\n";
+                    echo "The Intuit Helper message is: IntuitErrorType:{" . $error->getIntuitErrorType() . "} IntuitErrorCode:{" . $error->getIntuitErrorCode() . "} IntuitErrorMessage:{" . $error->getIntuitErrorMessage() . "} IntuitErrorDetail:{" . $error->getIntuitErrorDetail() . "}";
+                }
+
+                //Paso 7 Guardar la orden en orden_producto
                 
-              }
-              $error = $this->quickbooks->getLastError();
-              if ($error != null) {
-                echo "The Status code is: " . $error->getHttpStatusCode() . "\n";
-                echo "The Helper message is: " . $error->getOAuthHelperError() . "\n";
-                echo "The Response message is: " . $error->getResponseBody() . "\n";
-                echo "The Intuit Helper message is: IntuitErrorType:{" . $error->getIntuitErrorType() . "} IntuitErrorCode:{" . $error->getIntuitErrorCode() . "} IntuitErrorMessage:{" . $error->getIntuitErrorMessage() . "} IntuitErrorDetail:{" . $error->getIntuitErrorDetail() . "}";
-                } 
 
 
-             die();
+                die();
             }
         }
     }
