@@ -22,8 +22,6 @@ class OrdersProducts extends Model
 
     public $volume;
 
-    public $status_id;
-
     /**
      * Undocumented function
      *

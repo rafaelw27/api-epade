@@ -16,6 +16,8 @@ class Orders extends Model
 
     public $route_id;
 
+    public $status_id;
+
     public $created_at;
 
     /**

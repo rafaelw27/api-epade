@@ -218,6 +218,24 @@ $router->post('/orders', [
     'create',
 ]);
 
+$router->get('/orders/{id}/order', [
+    'Epade\Controllers\OrdersController',
+    'getOrdersByOrderId',
+]);
+
+$router->get('/orders/{id}/client', [
+    'Epade\Controllers\OrdersController',
+    'getOrdersByClientId',
+]);
+
+$router->post('/orders/{id}/status', [
+    'Epade\Controllers\OrdersController',
+    'changeOrderStatus',
+]);
+
+
+
+
 
 
 #to Sync all vendors in our database

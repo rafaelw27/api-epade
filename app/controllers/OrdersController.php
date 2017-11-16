@@ -34,20 +34,20 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
     public function create() :Response
     {
         if ($this->request->isPost()) {
-            // $rawData = $this->request->getRawBody();
-            // $jsonData = json_decode($rawData);
+            $rawData = $this->request->getRawBody();
+            $jsonData = json_decode($rawData);
             
-            // //Suponiendo que la data se mandara asi
-            // $user_id = 1; //$this->session->get("id");\
-            // $client_id = 1;    //$jsonData->client_id;
+            //Suponiendo que la data se mandara asi
+            $user_id = 1; //$this->session->get("id");\
+            $client_id = 1;    //$jsonData->client_id;
 
 
-            // //If data comes from mobile app
-            // if ($this->request->getContentType() == "application/x-www-form-urlencoded") {
-            //     $request = $this->request->getPost();
-            //     $user_id = $request['user_id'];//$this->session->get("id");
-            //     $client_id = $request['client_id'];
-            // }
+            //If data comes from mobile app
+            if ($this->request->getContentType() == "application/x-www-form-urlencoded") {
+                $request = $this->request->getPost();
+                $user_id = $request['user_id'];//$this->session->get("id");
+                $client_id = $request['client_id'];
+            }
 
             $request = $this->request->getPost();
             $user_id = $request['user_id'];//$this->session->get("id");
@@ -82,6 +82,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             $newOrder->user_id = $user_id;
             $newOrder->client_id = $client_id;
             $newOrder->route_id = $route_id;
+            $newOrder->status_id = 1;
             $newOrder->created_at = $created_at;
 
             if ($newOrder->save()) {
@@ -129,8 +130,6 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                     $productsArray[] = $productArray;
 
-                //    print_r(gettype($client_id));
-                //     die();
                 }
 
                 //Paso 4 comparar volumen total de productos con camiones
@@ -158,8 +157,6 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                     "bind" => [$randomDriver]
                 ]);
 
-                print_r($newOrder->id);
-
                 //Paso 6: Insertar la orden en Quickbooks en la entidad Invoice
                 $orderApi = Invoice::create([
                         "Deposit" => 0,
@@ -182,22 +179,44 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 ]);
 
                 if ($resultingObj = $this->quickbooks->Add($orderApi)) {
-                    print_r($resultingObj);
-                    die();
-                }
-                $error = $this->quickbooks->getLastError();
-                if ($error != null) {
-                    echo "The Status code is: " . $error->getHttpStatusCode() . "\n";
-                    echo "The Helper message is: " . $error->getOAuthHelperError() . "\n";
-                    echo "The Response message is: " . $error->getResponseBody() . "\n";
-                    echo "The Intuit Helper message is: IntuitErrorType:{" . $error->getIntuitErrorType() . "} IntuitErrorCode:{" . $error->getIntuitErrorCode() . "} IntuitErrorMessage:{" . $error->getIntuitErrorMessage() . "} IntuitErrorDetail:{" . $error->getIntuitErrorDetail() . "}";
-                }
+                    //Paso 7 Guardar la orden en orden_producto
 
-                //Paso 7 Guardar la orden en orden_producto
+                    foreach ($products as $product) {
+                        $newProduct = Products::findFirst([
+                            "conditions" => "id = ?0",
+                            "bind" => [$product]
+                        ]);
+
+                        $productTotalAmount = 0;
+                        $productTotalVolume = 0;
+    
+                        foreach ($quantities as $newProductQuantity) {
+                            $productTotalAmount += $this->calculateTotalAmount($newProductQuantity, $newProduct->unit_price);
+        
+                            $productTotalVolume += $this->calculateTotalProductVolume($newProductQuantity, $newProduct->unit_volume);
+    
+                        $orderProduct = new OrdersProducts();
+                        $orderProduct->order_id = $newOrder->id;
+                        $orderProduct->product_id = $newProduct->id;
+                        $orderProduct->truck_id = 1;
+                        $orderProduct->driver_id = $selectDriver->id;
+                        $orderProduct->quantity = $newProductQuantity;
+                        $orderProduct->volume = $productTotalVolume;
+                        
+                        if(!$orderProduct->save()){
+                            throw new \Exception("Order Product could not be created");
+                        }
+
+                        break;
+                        
+                        }
+    
+    
+                    }
                 
+                }
 
-
-                die();
+                return $this->response("Order Created");
             }
         }
     }
@@ -224,5 +243,177 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
     public function calculateTotalProductVolume($quantity, $unit_volume)
     {
         return $quantity * $unit_volume;
+    }
+
+    /**
+     * Fetches all orders products by order id
+     *
+     * @return void
+     */
+    public function getOrdersByOrderId($id){
+
+        $ordersArray = [];
+        $orderArray = [];
+        $totalAmt = 0;
+
+        $orderProducts = OrdersProducts::find([
+            "conditions" => "order_id = ?0",
+            "bind"=> [$id]
+        ]);
+
+        foreach ($orderProducts as $order) {
+
+            $orderInfo = Orders::findFirst([
+                "conditions" => "id = ?0",
+                "bind"=> [$order->order_id]
+            ]);
+
+            $productInfo = Products::findFirst([
+                "conditions" => "id = ?0",
+                "bind"=> [$order->product_id]
+            ]);
+
+            $orderArray['id'] = $order->id;
+
+            $orderArray['order_id'] = $order->order_id;
+            $orderArray['user_id'] = $orderInfo->user_id;
+            $orderArray['client_id'] = $orderInfo->client_id;
+            $orderArray['route_id'] = $orderInfo->route_id;
+            $orderArray['status_id'] = $orderInfo->status_id;
+            $orderArray['created_at'] = $orderInfo->created_at;
+
+            $orderArray['truck_id'] = $order->truck_id;
+            $orderArray['driver_id'] = $order->driver_id;
+
+            $orderArray['product_id'] = $order->product_id;
+            $orderArray["name"] = $productInfo->name;
+            $orderArray["full_name"] = $productInfo->full_name;
+            $orderArray["description"] = $productInfo->description;
+            $orderArray["maker"] = $productInfo->maker;
+            $orderArray["unit_price"] = $productInfo->unit_price;
+            $orderArray['quantity'] = $order->quantity;
+            $orderArray['volume'] = $order->volume;
+            
+
+            $totalAmt += $this->calculateTotalAmount($order->quantity,$productInfo->unit_price);
+
+            $ordersArray [] =  $orderArray;
+   
+        }
+
+        $ordersArray ["totalPrice"] =  $totalAmt;
+        
+        
+        if (!$orderProducts) {
+            throw new \Exception("There are no Products");
+        }
+        
+        return $this->response($ordersArray);
+
+    }
+
+    /**
+     * Fetches all orders products by client id
+     *
+     * @return void
+     */
+    public function getOrdersByClientId($id)
+    {
+        
+        $ordersArray = [];
+        $clientOrdersArray = [];
+        
+
+        $clientOrders = Orders::find([
+            "conditions" => "client_id = ?0",
+            "bind"=> [$id]
+        ]);
+
+        // print_r($clientOrders->toArray());
+        // die();
+
+        foreach ($clientOrders as $clientOrder) {
+
+            $totalAmt = 0;
+            $ordersArray = [];
+
+            $ordersArray['order_id'] = $clientOrder->id;
+            $ordersArray['user_id'] = $clientOrder->user_id;
+            $ordersArray['client_id'] = $clientOrder->client_id;
+            $ordersArray['route_id'] = $clientOrder->route_id;
+            $ordersArray ["status_id"] =  $clientOrder->status_id;
+            $ordersArray['created_at'] = $clientOrder->created_at;           
+
+            $orderProducts = OrdersProducts::find([
+                "conditions" => "order_id = ?0",
+                "bind"=> [$clientOrder->id]
+            ]);
+            
+            foreach ($orderProducts as $order) {
+            
+                $productInfo = Products::findFirst([
+                    "conditions" => "id = ?0",
+                    "bind"=> [$order->product_id]
+                ]);
+            
+                $orderArray['id'] = $order->id;
+                $orderArray['truck_id'] = $order->truck_id;
+                $orderArray['driver_id'] = $order->driver_id;
+            
+                $orderArray['product_id'] = $order->product_id;
+                $orderArray["name"] = $productInfo->name;
+                $orderArray["full_name"] = $productInfo->full_name;
+                $orderArray["description"] = $productInfo->description;
+                $orderArray["maker"] = $productInfo->maker;
+                $orderArray["unit_price"] = $productInfo->unit_price;
+                $orderArray['quantity'] = $order->quantity;
+                $orderArray['volume'] = $order->volume;
+            
+                $totalAmt += $this->calculateTotalAmount($order->quantity,$productInfo->unit_price);
+            
+                $ordersArray [] =  $orderArray;
+               
+            }
+            
+            $ordersArray ["totalPrice"] =  $totalAmt;
+            
+            if (!$orderProducts) {
+                throw new \Exception("There are no Products");
+            }
+        
+            $clientOrdersArray [] = $ordersArray;
+        }
+
+        return $this->response($clientOrdersArray);
+        
+    }
+
+    /**
+     * Changes the order status from Ready to Delivered
+     *
+     * @return void
+     */
+    public function changeOrderStatus($id): Response{
+
+        if($this->request->isPost()){
+            
+            $request = $this->request->getPost();
+            
+            $order = Orders::findFirst([
+                "conditions" => "id = ?0",
+                "bind"=> [$id]
+            ]);
+
+            $order->status_id = $request['status_id'];
+
+            if(!$order->update()){
+                throw new \Exception("Order status could not be changed");
+            }
+
+            return $this->response($order);
+
+        }
+        
+
     }
 }
