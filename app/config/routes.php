@@ -218,12 +218,12 @@ $router->post('/orders', [
     'create',
 ]);
 
-$router->get('/orders/{id}/order', [
+$router->get('/orders/{id}/orders', [
     'Epade\Controllers\OrdersController',
     'getOrdersByOrderId',
 ]);
 
-$router->get('/orders/{id}/client', [
+$router->get('/orders/{id}/clients', [
     'Epade\Controllers\OrdersController',
     'getOrdersByClientId',
 ]);
@@ -231,6 +231,11 @@ $router->get('/orders/{id}/client', [
 $router->post('/orders/{id}/status', [
     'Epade\Controllers\OrdersController',
     'changeOrderStatus',
+]);
+
+$router->get('/orders/{id}/drivers', [
+    'Epade\Controllers\OrdersController',
+    'getOrdersByDriver',
 ]);
 
 

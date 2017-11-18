@@ -9,6 +9,7 @@ use Epade\Models\Clients;
 use Epade\Models\Trucks;
 use Epade\Models\Drivers;
 use Epade\Models\Routes;
+use Epade\Models\Status;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use QuickBooksOnline\API\Facades\Invoice;
@@ -329,19 +330,23 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             "bind"=> [$id]
         ]);
 
-        // print_r($clientOrders->toArray());
-        // die();
 
         foreach ($clientOrders as $clientOrder) {
 
             $totalAmt = 0;
             $ordersArray = [];
 
+            $statusInfo = Status::findFirst([
+                "conditions" => "id = ?0",
+                "bind"=> [$clientOrder->status_id]
+            ]);
+
             $ordersArray['order_id'] = $clientOrder->id;
             $ordersArray['user_id'] = $clientOrder->user_id;
             $ordersArray['client_id'] = $clientOrder->client_id;
             $ordersArray['route_id'] = $clientOrder->route_id;
             $ordersArray ["status_id"] =  $clientOrder->status_id;
+            $ordersArray ["status"] =  $statusInfo->status_name;
             $ordersArray['created_at'] = $clientOrder->created_at;           
 
             $orderProducts = OrdersProducts::find([
@@ -414,6 +419,83 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
         }
         
+
+    }
+
+    /**
+     * Fetch Orders that have been assigned to a driver by id
+     *
+     * @return void
+     */
+    public function getOrdersByDriver($id){
+
+        $orderArray = [];
+        $ordersArray = [];
+
+        $orderProducts = OrdersProducts::find([
+            "conditions" => "driver_id = ?0",
+            "bind"=> [$id],
+            "group" => "order_id"
+        ]);
+
+        if($orderProducts){
+
+        foreach ($orderProducts as $orderProduct) {
+
+
+        $order = Orders::findFirst([
+            "conditions" => "id = ?0",
+            "bind"=> [$orderProduct->order_id]
+        ]);
+
+        if($order){
+
+        $status = Status::findFirst([
+            "conditions" => "id = ?0",
+            "bind"=> [$order->status_id]
+        ]);
+
+        $route = Routes::findFirst([
+            "conditions" => "id = ?0",
+            "bind"=> [$order->route_id]
+        ]);
+
+        $client = Clients::findFirst([
+            "conditions" => "id = ?0",
+            "bind"=> [$order->client_id]
+        ]);
+
+        //Put it in an array
+
+        //Order
+        $orderArray['order_id'] = $order->id;
+        
+        //Clients
+        $orderArray['client_id'] = $client->id;
+        $orderArray['company_name'] = $client->company_name;
+        $orderArray['phone'] = $client->phone;
+
+        //Routes
+        $orderArray["route_id"] = $route->id;
+        $orderArray["street"] = $route->street;
+        $orderArray["city"] = $route->city;
+        $orderArray["latitude"] = $route->latitude;
+        $orderArray["longitude"] = $route->longitude;
+
+        //Status
+        $orderArray['status_id'] = $status->id;
+        $orderArray['status_name'] = $status->status_name;
+
+        $ordersArray [] = $orderArray;
+
+        }
+
+        }
+
+    }
+
+        return $this->response($ordersArray);
+
 
     }
 }
