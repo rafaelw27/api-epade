@@ -30,13 +30,35 @@ class ReportsController extends \Baka\Http\Rest\CrudExtendedController
     public function create(): Response
     {
         if ($this->request->isPost()) {
-            $request = $this->request->getPost();
+
+            $rawData = $this->request->getRawBody();
+            $jsonData = json_decode($rawData);
+            
+            $user_id = $jsonData->user_id;
+            $title = $jsonData->title;
+            $description = $jsonData->description;
+            //$created_at = $jsonData->created_at;
 
             $report = new Reports();
-            $report->user_id = $request['user_id'];
-            $report->title = $request['title'];
-            $report->description = $request['description'];
-            $report->created_at = date("Y-m-d h:i:s");
+
+            $report->user_id = $user_id ;
+            $report->title = $title;
+            $report->description = $description;
+            //$report->created_at = created_at;
+
+            //If data comes from mobile app
+            if($this->request->getContentType() == "application/x-www-form-urlencoded"){
+
+                $request = $this->request->getPost();
+                
+                $report->user_id = $request['user_id'];
+                $report->title = $request['title'];
+                $report->description = $request['description'];
+                $report->created_at = date("Y-m-d h:i:s");
+                
+
+            }
+
 
             if (!$report->save()) {
                 throw new \Exception('Report could not be created');
