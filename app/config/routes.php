@@ -45,7 +45,7 @@ $router->post('/trucks/{id}', [
     'edit',
 ]);
 
-$router->delete('/trucks/{id}', [
+$router->get('/trucks/{id}/delete', [
     'Epade\Controllers\TrucksController',
     'delete',
 ]);
@@ -72,7 +72,7 @@ $router->post('/reports/{id}', [
     'edit',
 ]);
 
-$router->delete('/reports/{id}', [
+$router->get('/reports/{id}/delete', [
     'Epade\Controllers\ReportsController',
     'delete',
 ]);
@@ -99,7 +99,7 @@ $router->post('/drivers/{id}', [
     'edit',
 ]);
 
-$router->delete('/drivers/{id}', [
+$router->get('/drivers/{id}/delete', [
     'Epade\Controllers\DriversController',
     'delete',
 ]);
@@ -126,7 +126,7 @@ $router->post('/users/{id}', [
     'edit',
 ]);
 
-$router->delete('/users/{id}', [
+$router->get('/users/{id}/delete', [
     'Epade\Controllers\UsersController',
     'delete',
 ]);
@@ -160,7 +160,7 @@ $router->post('/products/{id}', [
     'edit',
 ]);
 
-$router->delete('/products/{id}', [
+$router->get('/products/{id}/delete', [
     'Epade\Controllers\ProductsController',
     'delete',
 ]);
