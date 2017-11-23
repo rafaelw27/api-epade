@@ -38,23 +38,29 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             $rawData = $this->request->getRawBody();
             $jsonData = json_decode($rawData);
             
-            //Suponiendo que la data se mandara asi
-            $user_id = 1; //$this->session->get("id");\
-            $client_id = 1;    //$jsonData->client_id;
-
-
+            if($jsonData){
+                
+                $user_id = $jsonData->user_id; //$this->session->get("id");\
+                $client_id = $jsonData->client_id;
+                $stringProducts = $jsonData->products; 
+                $stringQuantity = $jsonData->quantity;
+            }
+            
             //If data comes from mobile app
             if ($this->request->getContentType() == "application/x-www-form-urlencoded") {
                 $request = $this->request->getPost();
                 $user_id = $request['user_id'];//$this->session->get("id");
                 $client_id = $request['client_id'];
+                $stringProducts = $request['products']; //string con el id de cada producto separado por coma
+                $stringQuantity = $request['quantity']; //Cantidad de products
+    
             }
 
-            $request = $this->request->getPost();
-            $user_id = $request['user_id'];//$this->session->get("id");
-            $client_id = $request['client_id'];
-            $stringProducts = $request['products']; //string con el id de cada producto separado por coma
-            $stringQuantity = $request['quantity']; //Cantidad de products
+            // $request = $this->request->getPost();
+            // $user_id = $request['user_id'];//$this->session->get("id");
+            // $client_id = $request['client_id'];
+            // $stringProducts = $request['products']; //string con el id de cada producto separado por coma
+            // $stringQuantity = $request['quantity']; //Cantidad de products
 
             //Paso 1: Buscar cliente en la base de datos nuestra
             $client = Clients::findFirst([
@@ -142,7 +148,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 ]);
 
                 if ($truck) {
-                    $truck->capacity -= $totalVolume;
+                    $truck->load -= $totalVolume;
                     $truck->update();
                 }
 
@@ -497,5 +503,57 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
         return $this->response($ordersArray);
 
 
+    }
+
+    /**
+     * Function of when an order is succesfully delivered. Funciona en un 80% porque se tiene que hacer update en Quickbooks
+     *
+     * @return void
+     */
+    public function orderDelivered($id): Response 
+    {
+
+        //Paso 1: Buscamos la orden en la base de datos
+        $order = $this->model::findFirst([
+            "conditions" => "id = ?0 and status_id = ?1",
+            "bind" => [$id,1]
+        ]);
+
+        if($order){
+
+            //Paso 2: Buscamos en order_products todas los productos ligados a la orden
+            $orderProducts = OrdersProducts::find([
+                "conditions" => "order_id = ?0 ",
+                "bind" => [$order->id]
+            ]);
+
+            if(! $orderProducts){
+                throw new \Exception("Order products not found");
+            }
+
+            $truck = Trucks::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$orderProducts[0]->truck_id]
+            ]);
+
+            if(!$truck){
+                throw new \Exception("Truck not found");
+            }
+
+            //Paso 4: Iteramos por cada orden_producto para restablecer la capacidad del camion
+            foreach ($orderProducts as $orderProduct) {
+                
+                $truck->load += $orderProduct->volume;
+            }
+
+            if($truck->update()){
+                
+                $order->status_id = 2;
+                if($order->update()){
+                    return $this->response("Order Delivered");
+                }
+            }
+
+        }
     }
 }

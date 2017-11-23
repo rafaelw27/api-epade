@@ -32,6 +32,7 @@ class TrucksController extends \Baka\Http\Rest\CrudExtendedController
                 "user_id",
                 "brand",
                 "model",
+                "load",
                 "capacity",
                 "plate"
             ]);
@@ -58,7 +59,7 @@ public function edit($id): Response
     if($this->request->isPost())
     {
         $newData = $this->request->getPost();
-        $updateFields = ['user_id','brand','model','capacity','plate'];
+        $updateFields = ['user_id','brand','model','load','capacity','plate'];
 
         $truck = $this->model::findFirst([
             "conditions" => "id = ?0",
