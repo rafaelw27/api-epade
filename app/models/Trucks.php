@@ -16,6 +16,8 @@ class Trucks extends Model
 
     public $model;
 
+    public $load;
+
     public $capacity;
 
     public $plate;

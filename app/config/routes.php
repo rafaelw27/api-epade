@@ -238,6 +238,11 @@ $router->get('/orders/{id}/drivers', [
     'getOrdersByDriver',
 ]);
 
+$router->get('/orders/{id}/delivered', [
+    'Epade\Controllers\OrdersController',
+    'orderDelivered',
+]);
+
 
 
 
