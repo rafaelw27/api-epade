@@ -101,7 +101,6 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 $productsArray = [];
                 $productArray = [];
 
-
                 //Posible solucion: Array Asociativo [product_id] => quantity
                 foreach ($products as $product) {
                     $dbProduct = Products::findFirst([
@@ -109,13 +108,13 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                         "bind" => [$product]
                     ]);
 
-                
+                    $totalAmount += $this->calculateTotalAmount($quantities[key($products)], $dbProduct->unit_price);
+                    
+                    $totalVolume += $this->calculateTotalProductVolume($quantities[key($products)], $dbProduct->unit_volume);
+                    
                     if ($dbProduct) {
                         foreach ($quantities as $productQuantity) {
-                            $totalAmount += $this->calculateTotalAmount($productQuantity, $dbProduct->unit_price);
-        
-                            $totalVolume += $this->calculateTotalProductVolume($productQuantity, $dbProduct->unit_volume);
-
+                            
                             //$productArray['Id'] = $dbProduct->id;
                             $productArray['Description'] = $dbProduct->description;
                             $productArray['Amount'] = $dbProduct->unit_price * $productQuantity ;
@@ -130,12 +129,12 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                             ];
                            
                             //$productArray['TotalAmt'] = $totalAmount; //Later make function for total amount of all products
-
-                            break;//For now
                         }
                     }
 
                     $productsArray[] = $productArray;
+
+                    next($products);
 
                 }
 
@@ -187,6 +186,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                 if ($resultingObj = $this->quickbooks->Add($orderApi)) {
                     //Paso 7 Guardar la orden en orden_producto
+                    reset($products);
 
                     foreach ($products as $product) {
                         $newProduct = Products::findFirst([
@@ -196,28 +196,24 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                         $productTotalAmount = 0;
                         $productTotalVolume = 0;
-    
-                        foreach ($quantities as $newProductQuantity) {
-                            $productTotalAmount += $this->calculateTotalAmount($newProductQuantity, $newProduct->unit_price);
-        
-                            $productTotalVolume += $this->calculateTotalProductVolume($newProductQuantity, $newProduct->unit_volume);
-    
+
+                        $productTotalAmount += $this->calculateTotalAmount($quantities[key($products)], $newProduct->unit_price);
+                        
+                        $productTotalVolume += $this->calculateTotalProductVolume($quantities[key($products)], $newProduct->unit_volume);
+                            
                         $orderProduct = new OrdersProducts();
                         $orderProduct->order_id = $newOrder->id;
                         $orderProduct->product_id = $newProduct->id;
-                        $orderProduct->truck_id = 1;
+                        $orderProduct->truck_id = $truck->id;
                         $orderProduct->driver_id = $selectDriver->id;
-                        $orderProduct->quantity = $newProductQuantity;
+                        $orderProduct->quantity = $quantities[key($products)];
                         $orderProduct->volume = $productTotalVolume;
                         
                         if(!$orderProduct->save()){
                             throw new \Exception("Order Product could not be created");
                         }
-
-                        break;
                         
-                        }
-    
+                        next($products);
     
                     }
                 
