@@ -223,6 +223,11 @@ $router->post('/orders', [
     'create',
 ]);
 
+$router->get('/orders', [
+    'Epade\Controllers\OrdersController',
+    'getAllOrders',
+]);
+
 $router->get('/orders/{id}/orders', [
     'Epade\Controllers\OrdersController',
     'getOrdersByOrderId',
