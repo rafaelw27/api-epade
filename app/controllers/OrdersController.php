@@ -253,6 +253,23 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
     }
 
     /**
+     * Get all orders from database
+     *
+     * @return Response
+     */
+    public function getAllOrders(): Response{
+
+        $orders = $this->model::find();
+
+        if(!$orders){
+            throw new \Exception("Orders not found");
+        }
+
+        return $this->response($orders);
+
+    }
+
+    /**
      * Fetches all orders products by order id
      *
      * @return void
