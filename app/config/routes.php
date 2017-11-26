@@ -211,6 +211,11 @@ $router->get('/routes/{id}', [
     'getRoute',
 ]);
 
+$router->get('/routes/{id}/calculate', [
+    'Epade\Controllers\RoutesController',
+    'calculateRoute',
+]);
+
 #Orders
 
 $router->post('/orders', [
