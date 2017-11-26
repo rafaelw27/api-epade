@@ -10,6 +10,7 @@ $loader->registerNamespaces([
     'Epade\Controllers' => $config->application->controllersDir,
     'Mesocom\Models' => $config->application->modelsDir,
     'Epade\Models' => $config->application->modelsDir,
+    'Gen' => '/home/api-epade/app/library/tsp-genetic-algorithm-master/src/',
     'Mesocom' => $config->application->libraryDir,
     'Incursio' => $config->application->libraryDir,
     'Baka\Database' => '/home/baka/database/src/',
