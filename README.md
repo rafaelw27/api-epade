@@ -270,7 +270,7 @@ This route will return all orders on the database.
 
 **Get Order:**
 
-GET http://d2d4a75a.ngrok.io/orders/id
+GET http://d2d4a75a.ngrok.io/orders/id/orders
 
 This route will return an order based on a specific id.
 
