@@ -264,7 +264,7 @@ This route will enable you to create an order on the database. You will have to 
 
 **Get All Orders:**
 
-GET http://d2d4a75a.ngrok.io/orders
+(TBA)
 
 This route will return all orders on the database.
 
