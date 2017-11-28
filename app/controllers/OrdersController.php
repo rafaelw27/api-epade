@@ -569,4 +569,88 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
         }
     }
+
+    /**
+     * Function for returning an order
+     *
+     * @return Response
+     */
+    public function returnOrderProduct($id): Response
+    {
+        if($this->request->isPost()){
+
+            // $rawData = $this->request->getRawBody();
+            // $jsonData = json_decode($rawData);
+            
+            // if($jsonData){
+                
+            //     $product_id = $jsonData->product_id;
+            //     $quantity = $jsonData->quantity;
+            // }
+
+            $request = $this->request->getPost();
+
+            $product_id = $request['product_id'];
+            $quantity = $request['quantity'];
+
+            //Paso 1: Buscamos el producto que pertenece a la orden ( OK )
+            $order = OrdersProducts::findFirst([
+                "conditions" => "order_id = ?0 and product_id = ?1",
+                "bind" => [$id,$product_id]
+            ]);
+
+            if(!$order){
+                throw new \Exception("Order not found");
+            }
+
+            //Paso 2: Restamos cantidad de producto en orden, aumentamos en el inventario ( OK )
+
+            $order->quantity = $order->quantity - $quantity;
+
+            if(!$order->update()){
+                throw new \Exception("Order could not be updated");
+            }
+
+            $inventory = Products::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$product_id]
+            ]);
+
+            $inventory->quantity = $inventory->quantity + $quantity;
+
+            if(!$inventory->update()){
+                throw new \Exception("Product could not update");
+            }
+
+            //Paso 3: Hacer lo mismo en Quickbooks 
+
+
+                $orderApi = Invoice::update([
+                "sparse" => true,
+                "Id"=> "$id",
+                "Line" => [
+                    "SalesItemLineDetail" => [
+                      "ItemRef"=> [
+                        "value"=> "$order->product_id",
+                        "name"=> "Hours"]
+                    ],
+                      "Qty"=> $order->quantity - $quantity ,
+                  ],
+                "CustomerRef"=>[
+                    "value"=> $order->client_id
+                ],
+                //"Id" => "235", Parece que no se puede asignar Id a una orden nueva
+            ]);
+
+            if ($resultingObj = $this->quickbooks->Add($orderApi)){
+                print_r($resultingObj);
+                die();
+            }
+
+            
+
+        }
+        
+
+    }
 }

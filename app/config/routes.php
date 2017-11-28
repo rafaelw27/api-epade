@@ -253,6 +253,11 @@ $router->get('/orders/{id}/delivered', [
     'orderDelivered',
 ]);
 
+$router->post('/orders/{id}/return', [
+    'Epade\Controllers\OrdersController',
+    'returnOrderProduct',
+]);
+
 
 
 
