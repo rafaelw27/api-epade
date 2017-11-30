@@ -10,6 +10,7 @@ use Epade\Models\Trucks;
 use Epade\Models\Drivers;
 use Epade\Models\Routes;
 use Epade\Models\Status;
+use Epade\Models\Users;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use QuickBooksOnline\API\Facades\Invoice;
@@ -255,13 +256,79 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
      */
     public function getAllOrders(): Response{
 
+        $orderArray = [];
+        $ordersArray = [];
+
         $orders = $this->model::find();
 
         if(!$orders){
             throw new \Exception("Orders not found");
         }
 
-        return $this->response($orders);
+        foreach ($orders as $order) {
+            
+            $user = Users::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->user_id]
+            ]);
+            
+            if(!$user){
+                throw new \Exception("User not found");
+            }
+
+            $client = Clients::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->client_id]
+            ]);
+
+            if(!$client){
+                throw new \Exception("Client not found");
+            }
+
+            $route = Routes::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->route_id]
+            ]);
+
+            if(!$route){
+                throw new \Exception("Route not found");
+            }
+
+            $status = Status::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->status_id]
+            ]);
+
+            if(!$status){
+                throw new \Exception("Status not found");
+            }
+
+            $orderArray['id'] = $order->id;
+
+            $orderArray['user_id'] = $order->user_id;
+            $orderArray['first_name'] = $user->first_name;
+            $orderArray['last_name'] = $user->last_name;
+            $orderArray['email'] = $user->email;
+
+            $orderArray['client_id'] = $order->client_id;
+            $orderArray['company_name'] = $client->company_name;
+            $orderArray['email'] = $client->email;
+
+            $orderArray['route_id'] = $order->route_id;
+            $orderArray['street'] = $route->street;
+            $orderArray['city'] = $route->city;
+
+            $orderArray['status_id'] = $order->status_id;
+            $orderArray['status_name'] = $status->status_name;
+
+            
+            $ordersArray [] = $orderArray;
+
+        }
+
+
+
+        return $this->response($ordersArray);
 
     }
 
