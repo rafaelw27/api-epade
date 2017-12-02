@@ -10,6 +10,7 @@ use Epade\Models\Trucks;
 use Epade\Models\Drivers;
 use Epade\Models\Routes;
 use Epade\Models\Status;
+use Epade\Models\Users;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use QuickBooksOnline\API\Facades\Invoice;
@@ -101,7 +102,6 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 $productsArray = [];
                 $productArray = [];
 
-
                 //Posible solucion: Array Asociativo [product_id] => quantity
                 foreach ($products as $product) {
                     $dbProduct = Products::findFirst([
@@ -109,13 +109,13 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                         "bind" => [$product]
                     ]);
 
-                
+                    $totalAmount += $this->calculateTotalAmount($quantities[key($products)], $dbProduct->unit_price);
+                    
+                    $totalVolume += $this->calculateTotalProductVolume($quantities[key($products)], $dbProduct->unit_volume);
+                    
                     if ($dbProduct) {
                         foreach ($quantities as $productQuantity) {
-                            $totalAmount += $this->calculateTotalAmount($productQuantity, $dbProduct->unit_price);
-        
-                            $totalVolume += $this->calculateTotalProductVolume($productQuantity, $dbProduct->unit_volume);
-
+                            
                             //$productArray['Id'] = $dbProduct->id;
                             $productArray['Description'] = $dbProduct->description;
                             $productArray['Amount'] = $dbProduct->unit_price * $productQuantity ;
@@ -130,12 +130,12 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                             ];
                            
                             //$productArray['TotalAmt'] = $totalAmount; //Later make function for total amount of all products
-
-                            break;//For now
                         }
                     }
 
                     $productsArray[] = $productArray;
+
+                    next($products);
 
                 }
 
@@ -187,6 +187,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                 if ($resultingObj = $this->quickbooks->Add($orderApi)) {
                     //Paso 7 Guardar la orden en orden_producto
+                    reset($products);
 
                     foreach ($products as $product) {
                         $newProduct = Products::findFirst([
@@ -196,28 +197,24 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
                         $productTotalAmount = 0;
                         $productTotalVolume = 0;
-    
-                        foreach ($quantities as $newProductQuantity) {
-                            $productTotalAmount += $this->calculateTotalAmount($newProductQuantity, $newProduct->unit_price);
-        
-                            $productTotalVolume += $this->calculateTotalProductVolume($newProductQuantity, $newProduct->unit_volume);
-    
+
+                        $productTotalAmount += $this->calculateTotalAmount($quantities[key($products)], $newProduct->unit_price);
+                        
+                        $productTotalVolume += $this->calculateTotalProductVolume($quantities[key($products)], $newProduct->unit_volume);
+                            
                         $orderProduct = new OrdersProducts();
                         $orderProduct->order_id = $newOrder->id;
                         $orderProduct->product_id = $newProduct->id;
-                        $orderProduct->truck_id = 1;
+                        $orderProduct->truck_id = $truck->id;
                         $orderProduct->driver_id = $selectDriver->id;
-                        $orderProduct->quantity = $newProductQuantity;
+                        $orderProduct->quantity = $quantities[key($products)];
                         $orderProduct->volume = $productTotalVolume;
                         
                         if(!$orderProduct->save()){
                             throw new \Exception("Order Product could not be created");
                         }
-
-                        break;
                         
-                        }
-    
+                        next($products);
     
                     }
                 
@@ -259,13 +256,79 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
      */
     public function getAllOrders(): Response{
 
+        $orderArray = [];
+        $ordersArray = [];
+
         $orders = $this->model::find();
 
         if(!$orders){
             throw new \Exception("Orders not found");
         }
 
-        return $this->response($orders);
+        foreach ($orders as $order) {
+            
+            $user = Users::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->user_id]
+            ]);
+
+            if(!$user){
+                throw new \Exception("User not found");
+            }
+
+            $client = Clients::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->client_id]
+            ]);
+
+            if(!$client){
+                throw new \Exception("Client not found");
+            }
+
+            $route = Routes::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->route_id]
+            ]);
+
+            if(!$route){
+                throw new \Exception("Route not found");
+            }
+
+            $status = Status::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$order->status_id]
+            ]);
+
+            if(!$status){
+                throw new \Exception("Status not found");
+            }
+
+            $orderArray['id'] = $order->id;
+
+            $orderArray['user_id'] = $order->user_id;
+            $orderArray['first_name'] = $user->first_name;
+            $orderArray['last_name'] = $user->last_name;
+            $orderArray['email'] = $user->email;
+
+            $orderArray['client_id'] = $order->client_id;
+            $orderArray['company_name'] = $client->company_name;
+            $orderArray['email'] = $client->email;
+
+            $orderArray['route_id'] = $order->route_id;
+            $orderArray['street'] = $route->street;
+            $orderArray['city'] = $route->city;
+
+            $orderArray['status_id'] = $order->status_id;
+            $orderArray['status_name'] = $status->status_name;
+
+            
+            $ordersArray [] = $orderArray;
+
+        }
+
+
+
+        return $this->response($ordersArray);
 
     }
 
@@ -564,6 +627,16 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             }
 
             if($truck->update()){
+
+                if($this->request->hasFiles() == true){
+
+                    foreach ($this->request->getUploadedFiles() as $file) {
+                        echo $file->getName(), " ", $file->getSize(), "\n";
+                        $uploadedSignature = $file->moveTo("/home/api-epade/app/assets/signatures/" . $file->getName() );
+                        $order->signature = $uploadedSignature;
+                    }
+        
+                }
                 
                 $order->status_id = 2;
                 if($order->update()){
@@ -573,4 +646,93 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
         }
     }
+
+    /**
+     * Function for returning an order
+     *
+     * @return Response
+     */
+    public function returnOrderProduct($id): Response
+    {
+        if($this->request->isPost()){
+
+            // $rawData = $this->request->getRawBody();
+            // $jsonData = json_decode($rawData);
+            
+            // if($jsonData){
+                
+            //     $product_id = $jsonData->product_id;
+            //     $quantity = $jsonData->quantity;
+            // }
+
+            $request = $this->request->getPost();
+
+            $product_id = $request['product_id'];
+            $quantity = $request['quantity'];
+
+            //Paso 1: Buscamos el producto que pertenece a la orden ( OK )
+            $order = OrdersProducts::findFirst([
+                "conditions" => "order_id = ?0 and product_id = ?1",
+                "bind" => [$id,$product_id]
+            ]);
+
+            if(!$order){
+                throw new \Exception("Order not found");
+            }
+
+            //Paso 2: Restamos cantidad de producto en orden, aumentamos en el inventario ( OK )
+
+            $order->quantity = $order->quantity - $quantity;
+
+            if(!$order->update()){
+                throw new \Exception("Order could not be updated");
+            }
+
+            $inventory = Products::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$product_id]
+            ]);
+
+            $inventory->quantity = $inventory->quantity + $quantity;
+
+            if(!$inventory->update()){
+                throw new \Exception("Product could not update");
+            }
+
+            if($apiInvoice = $this->quickbooks->Query("SELECT * FROM Invoice where Id='$id'")){
+
+                $theInvoice = reset($apiInvoice);
+            //Paso 3: Hacer lo mismo en Quickbooks 
+                $orderApi = Invoice::update($theInvoice,[
+                "sparse" => true,
+                "Id"=> "$id",
+                "SyncToken"=> "0",
+                "Line" => [
+                    "SalesItemLineDetail" => [
+                      "ItemRef"=> [
+                        "value"=> "$order->product_id",
+                        "name"=> "Hours"],
+                    "Qty"=> $order->quantity - $quantity,
+                    ],
+                  ],
+                "CustomerRef"=>[
+                    "value"=> "$order->client_id",
+                ]
+                //"Id" => "235", Parece que no se puede asignar Id a una orden nueva
+            ]);
+
+            if ($resultingObj = $this->quickbooks->Update($orderApi)){
+                print_r("Hello");
+                die();
+            }
+
+        }
+
+            
+
+        }
+        
+
+    }
+    
 }
