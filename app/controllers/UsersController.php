@@ -4,6 +4,8 @@ namespace Epade\Controllers;
 
 use Epade\Models\Users;
 use Epade\Models\TypeUsers;
+use Epade\Models\Drivers;
+use Epade\Models\Vendors;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 
@@ -29,23 +31,54 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
     public function create(): Response 
     {
         if($this->request->isPost()){
-            
-            $user = $this->model->save(
-                $this->request->getPost(),
-                [
-                    "user_type_id",
-                    "first_name",
-                    "last_name",
-                    "email",
-                    "password",
-                    "phone",
-                ]);
 
-            if(!$user){
+            $request = $this->request->getPost();
+            
+            $user = $this->model;
+
+            $user->user_type_id = $request['user_type_id'];
+            $user->first_name = $request['first_name'];
+            $user->last_name = $request['last_name'];
+            $user->email = $request['email'];
+            $user->password = $request['password'];
+            $user->phone = $request['phone'];
+
+            if(!$user->save()){
                 throw new Exception("User could not be created");
             }
 
-            return $this->response('User created');
+            if($user->user_type_id == 1){
+                $driver = new Drivers();
+
+                $driver->id = $user->id;
+                $driver->first_name = $user->first_name;
+                $driver->last_name = $user->last_name;
+                $driver->phone = $user->phone;
+                $driver->email = $user->email;
+
+                if(!$driver->save()){
+                    throw new Exception("Driver could not be created");
+                }
+
+
+            }
+
+            if($user->user_type_id == 2){
+                $vendor = new Vendors();
+
+                $vendor->id = $user->id;
+                $vendor->first_name = $user->first_name;
+                $vendor->last_name = $user->last_name;
+                $vendor->active = true;
+                $vendor->phone = $user->phone;
+                $vendor->email = $user->email;
+
+                if(!$vendor->save()){
+                    throw new Exception("Vendor could not be created");
+                }
+            }
+
+            return $this->response($user);
 
         }
 

@@ -271,7 +271,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 "conditions" => "id = ?0",
                 "bind" => [$order->user_id]
             ]);
-            
+
             if(!$user){
                 throw new \Exception("User not found");
             }
@@ -627,6 +627,16 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
             }
 
             if($truck->update()){
+
+                if($this->request->hasFiles() == true){
+
+                    foreach ($this->request->getUploadedFiles() as $file) {
+                        echo $file->getName(), " ", $file->getSize(), "\n";
+                        $uploadedSignature = $file->moveTo("/home/api-epade/app/assets/signatures/" . $file->getName() );
+                        $order->signature = $uploadedSignature;
+                    }
+        
+                }
                 
                 $order->status_id = 2;
                 if($order->update()){
@@ -689,30 +699,34 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 throw new \Exception("Product could not update");
             }
 
+            if($apiInvoice = $this->quickbooks->Query("SELECT * FROM Invoice where Id='$id'")){
+
+                $theInvoice = reset($apiInvoice);
             //Paso 3: Hacer lo mismo en Quickbooks 
-
-
-                $orderApi = Invoice::update([
+                $orderApi = Invoice::update($theInvoice,[
                 "sparse" => true,
                 "Id"=> "$id",
+                "SyncToken"=> "0",
                 "Line" => [
                     "SalesItemLineDetail" => [
                       "ItemRef"=> [
                         "value"=> "$order->product_id",
-                        "name"=> "Hours"]
+                        "name"=> "Hours"],
+                    "Qty"=> $order->quantity - $quantity,
                     ],
-                      "Qty"=> $order->quantity - $quantity ,
                   ],
                 "CustomerRef"=>[
-                    "value"=> $order->client_id
-                ],
+                    "value"=> "$order->client_id",
+                ]
                 //"Id" => "235", Parece que no se puede asignar Id a una orden nueva
             ]);
 
-            if ($resultingObj = $this->quickbooks->Add($orderApi)){
-                print_r($resultingObj);
+            if ($resultingObj = $this->quickbooks->Update($orderApi)){
+                print_r("Hello");
                 die();
             }
+
+        }
 
             
 
@@ -720,4 +734,5 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
         
 
     }
+    
 }

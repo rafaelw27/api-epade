@@ -248,7 +248,7 @@ $router->get('/orders/{id}/drivers', [
     'getOrdersByDriver',
 ]);
 
-$router->get('/orders/{id}/delivered', [
+$router->post('/orders/{id}/delivered', [
     'Epade\Controllers\OrdersController',
     'orderDelivered',
 ]);

@@ -4,6 +4,7 @@ namespace Epade\Controllers;
 
 use Epade\Models\Clients;
 use Epade\Models\Routes;
+use Epade\Models\Users;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use QuickBooksOnline\API\Facades\Customer;
@@ -45,6 +46,19 @@ class ClientsController extends \Baka\Http\Rest\CrudExtendedController
                     $route->latitude = $apiClient->BillAddr->Lat;
                     $route->longitude = $apiClient->BillAddr->Long;
                     $route->save();
+
+                    $user = new Users();
+                    $user->id = $client->id;
+                    $user->user_type_id = 6;
+                    $user->first_name = $client->company_name;
+                    $user->last_name = "";
+                    $user->email = $client->email;
+                    $user->phone = $client->phone;
+                    $user->password = "1234";
+                    $user->save();
+
+                    
+
                 }
             }
 
