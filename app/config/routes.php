@@ -62,6 +62,11 @@ $router->get('/reports/{id}', [
     'getReport',
 ]);
 
+$router->get('/reports/{id}/users', [
+    'Epade\Controllers\ReportsController',
+    'getReportByUser',
+]);
+
 $router->post('/reports', [
     'Epade\Controllers\ReportsController',
     'create',
@@ -275,6 +280,25 @@ $router->get('/vendors/quickbooks', [
 $router->get('/clients/quickbooks', [
     'Epade\Controllers\ClientsController',
     'saveVendorsToDb',
+]);
+
+#to Sync all clients to clients_vendors
+
+$router->get('/vendors-clients/sync', [
+    'Epade\Controllers\VendorsClientsController',
+    'saveVendorsClients',
+]);
+
+# Vendor Clients
+
+$router->get('/vendors-clients', [
+    'Epade\Controllers\VendorsClientsController',
+    'getVendorsClients',
+]);
+
+$router->get('/vendors-clients/{id}/visited', [
+    'Epade\Controllers\VendorsClientsController',
+    'changeVisitedState',
 ]);
 
 

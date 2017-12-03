@@ -144,9 +144,35 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
      */
     public function getUsers(): Response {
 
+        $usersArray = [];
+        $userArray= [];
+
         $users = $this->model::find();
 
-        return $this->response($users);
+        if(!$users){
+            throw new \Exception('Users could not be found');
+        }
+
+        foreach ($users as $user) {
+            
+            $user_type = TypeUsers::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$user->user_type_id]
+            ]);
+
+            $userArray['id'] = $user->id;
+            $userArray['user_type_id'] = $user_type->id;
+            $userArray['user_type_name'] = $user_type->name;
+            $userArray['first_name'] = $user->first_name;
+            $userArray['last_name'] = $user->last_name;
+            $userArray['email'] = $user->email;
+            $userArray['password'] = $user->password;
+            $userArray['phone'] = $user->phone;
+
+            $usersArray[] = $userArray;
+        }
+
+        return $this->response($usersArray);
 
     }
 

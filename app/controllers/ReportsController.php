@@ -3,6 +3,7 @@
 namespace Epade\Controllers;
 
 use Epade\Models\Reports;
+use Epade\Models\Users;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 use QuickBooksOnline\API\Facades\Item;
@@ -111,17 +112,51 @@ class ReportsController extends \Baka\Http\Rest\CrudExtendedController
         return $this->response("Report Deleted.");
     }
 
+    /**
+     * Get all the reports from the database
+     *
+     * @return Response
+     */
     public function getReports() : Response
     {
+        $reportsArray = [];
+        $reportArray= [];
+        
         $reports = $this->model::find();
-        
-        if (!$reports) {
-            throw new \Exception("There are no Reports");
+    
+        if(!$reports){
+            throw new \Exception("There are no trucks");
         }
-        
-            return $this->response($reports);
+    
+        foreach ($reports as $report) {
+            
+            $user = Users::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$report->user_id]
+            ]);
+            
+            $reportArray['id'] = $report->id;
+            $reportArray['user_id'] = $user->id;
+            $reportArray['first_name'] = $user->first_name;
+            $reportArray['last_name'] = $user->last_name;
+            $reportArray['title'] = $report->title;
+            $reportArray['description'] = $report->description;
+            $reportArray['created_at'] = $report->created_at;
+    
+            
+    
+            $reportsArray[] = $reportArray;
+        }
+    
+        return $this->response($reportsArray);
     }
 
+    /**
+     * Fetches a specific report by its id
+     *
+     * @param [type] $id
+     * @return Response
+     */
     public function getReport($id) : Response
     {
         $report = $this->model::findFirst([
@@ -134,5 +169,49 @@ class ReportsController extends \Baka\Http\Rest\CrudExtendedController
         }
         
         return $this->response($report);
+    }
+
+    /**
+     * Fetches the reports of a specific user
+     *
+     * @param [type] $id
+     * @return void
+     */
+    public function getReportByUser($id){
+
+        $reportsArray = [];
+        $reportArray= [];
+        
+        $reports = $this->model::find([
+            "conditions" => "user_id = ?0",
+            "bind" => [$id]
+        ]);
+    
+        if(!$reports){
+            throw new \Exception("There are no trucks");
+        }
+    
+        foreach ($reports as $report) {
+            
+            $user = Users::findFirst([
+                "conditions" => "id = ?0",
+                "bind" => [$report->user_id]
+            ]);
+            
+            $reportArray['id'] = $report->id;
+            $reportArray['user_id'] = $user->id;
+            $reportArray['first_name'] = $user->first_name;
+            $reportArray['last_name'] = $user->last_name;
+            $reportArray['title'] = $report->title;
+            $reportArray['description'] = $report->description;
+            $reportArray['created_at'] = $report->created_at;
+    
+            
+    
+            $reportsArray[] = $reportArray;
+        }
+    
+        return $this->response($reportsArray);
+
     }
 }
