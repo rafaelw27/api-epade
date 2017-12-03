@@ -2,6 +2,7 @@
 namespace Epade\Controllers;
 
 use Epade\Models\Trucks;
+use Epade\Models\Users;
 use Baka\Http\Rest\CrudExtendedController;
 use Phalcon\Http\Response;
 
@@ -107,6 +108,9 @@ public function delete($id) : Response
  * @return Response
  */
 public function getTrucks(): Response{
+
+    $trucksArray = [];
+    $truckArray= [];
     
     $trucks = $this->model::find();
 
@@ -114,7 +118,28 @@ public function getTrucks(): Response{
         throw new \Exception("There are no trucks");
     }
 
-    return $this->response($trucks);
+    foreach ($trucks as $truck) {
+        
+        $user = Users::findFirst([
+            "conditions" => "id = ?0",
+            "bind" => [$truck->user_id]
+        ]);
+        
+        $truckArray['id'] = $truck->id;
+        $truckArray['user_id'] = $user->id;
+        $truckArray['first_name'] = $user->first_name;
+        $truckArray['last_name'] = $user->last_name;
+        $truckArray['brand'] = $truck->brand;
+        $truckArray['model'] = $truck->model;
+        $truckArray['capacity'] = $truck->capacity;
+        $truckArray['plate'] = $truck->plate;
+        $truckArray['load'] = $truck->load;
+        
+
+        $trucksArray[] = $truckArray;
+    }
+
+    return $this->response($trucksArray);
 }
 
 /**
