@@ -304,6 +304,21 @@ POST http://d2d4a75a.ngrok.io/logout
 
 This is the route for the logout. This will destroy the current session.
 
+
+### Vendors-Clients Route
+
+**Get All Vendors-Clients**
+
+GET http://d2d4a75a.ngrok.io/vendors-clients
+
+This route will return all vendors, clients, and the status( if they are visited = 1, if they are not visited = 0).
+
+**Change Client Status to Visited**
+
+GET http://d2d4a75a.ngrok.io/vendors-clients/id/visited
+
+This route will change the status of a client to visited and return a message confirming that the status has changed.
+
 ### Extra Routes
 
 **Sync all Vendors in our Database**
@@ -313,3 +328,7 @@ GET http://d2d4a75a.ngrok.io/vendors/quickbooks
 **Sync all Clients in our Database**
 
 GET http://d2d4a75a.ngrok.io/clients/quickbooks
+
+**Sync all Clients into clients_vendors**
+
+http://d2d4a75a.ngrok.io/vendors-clients/sync
