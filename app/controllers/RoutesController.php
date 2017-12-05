@@ -76,10 +76,8 @@ class RoutesController extends \Baka\Http\Rest\CrudExtendedController
         
         if($jsonData){
             
-            $user_id = $jsonData->user_id;
-            $client_id = $jsonData->client_id;
-            $stringProducts = $jsonData->products; 
-            $stringQuantity = $jsonData->quantity;
+            $latitude = $jsonData->latitude;
+            $longitude = $jsonData->longitude;
         }
 
         }
@@ -93,7 +91,7 @@ class RoutesController extends \Baka\Http\Rest\CrudExtendedController
 
         $plan = new Plan();
 
-        $plan->addPlace(new Place('currentLocation',new Point(18.466146,-69.9450252)));
+        $plan->addPlace(new Place('currentLocation',new Point($latitude,$longitude)));
 
         foreach ($driverOrders as $driverOrder) {
             

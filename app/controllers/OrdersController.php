@@ -427,8 +427,15 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 "bind"=> [$clientOrder->status_id]
             ]);
 
+            $user = Users::findFirst([
+                "conditions" => "id = ?0",
+                "bind"=> [$clientOrder->user_id]
+            ]);
+
             $ordersArray['order_id'] = $clientOrder->id;
             $ordersArray['user_id'] = $clientOrder->user_id;
+            $ordersArray['first_name'] = $user->first_name;
+            $ordersArray['last_name'] = $user->last_name;
             $ordersArray['client_id'] = $clientOrder->client_id;
             $ordersArray['route_id'] = $clientOrder->route_id;
             $ordersArray ["status_id"] =  $clientOrder->status_id;
@@ -592,7 +599,14 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
      */
     public function orderDelivered($id): Response 
     {
+        $rawData = $this->request->getRawBody();
+        $jsonData = json_decode($rawData);
+        
+        if($jsonData){
+            $signature = $jsonData->signature; 
 
+        }
+        
         //Paso 1: Buscamos la orden en la base de datos
         $order = $this->model::findFirst([
             "conditions" => "id = ?0 and status_id = ?1",
@@ -628,16 +642,16 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
             if($truck->update()){
 
-                if($this->request->hasFiles() == true){
+                // if($this->request->hasFiles() == true){
 
-                    foreach ($this->request->getUploadedFiles() as $file) {
-                        echo $file->getName(), " ", $file->getSize(), "\n";
-                        $uploadedSignature = $file->moveTo("/home/api-epade/app/assets/signatures/" . $file->getName() );
-                        $order->signature = $uploadedSignature;
-                    }
+                //     foreach ($this->request->getUploadedFiles() as $file) {
+                //         echo $file->getName(), " ", $file->getSize(), "\n";
+                //         $uploadedSignature = $file->moveTo("/home/api-epade/app/assets/signatures/" . $file->getName() );
+                //         $order->signature = $uploadedSignature;
+                //     }
         
-                }
-                
+                // }
+                $order->signature = $signature;
                 $order->status_id = 2;
                 if($order->update()){
                     return $this->response("Order Delivered");
@@ -649,7 +663,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
 
     /**
      * Function for returning an order
-     *
+     *@todo Solo hace el return en nuestro sistema.
      * @return Response
      */
     public function returnOrderProduct($id): Response
@@ -699,36 +713,7 @@ class OrdersController extends \Baka\Http\Rest\CrudExtendedController
                 throw new \Exception("Product could not update");
             }
 
-            if($apiInvoice = $this->quickbooks->Query("SELECT * FROM Invoice where Id='$id'")){
-
-                $theInvoice = reset($apiInvoice);
-            //Paso 3: Hacer lo mismo en Quickbooks 
-                $orderApi = Invoice::update($theInvoice,[
-                "sparse" => true,
-                "Id"=> "$id",
-                "SyncToken"=> "0",
-                "Line" => [
-                    "SalesItemLineDetail" => [
-                      "ItemRef"=> [
-                        "value"=> "$order->product_id",
-                        "name"=> "Hours"],
-                    "Qty"=> $order->quantity - $quantity,
-                    ],
-                  ],
-                "CustomerRef"=>[
-                    "value"=> "$order->client_id",
-                ]
-                //"Id" => "235", Parece que no se puede asignar Id a una orden nueva
-            ]);
-
-            if ($resultingObj = $this->quickbooks->Update($orderApi)){
-                print_r("Hello");
-                die();
-            }
-
-        }
-
-            
+            return $this->response("Order Product returned");
 
         }
         

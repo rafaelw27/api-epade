@@ -22,6 +22,8 @@ class Users extends Model
 
     public $phone;
 
+    public $active;
+
     /**
      * Undocumented function
      *

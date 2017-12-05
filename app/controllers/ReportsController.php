@@ -38,14 +38,14 @@ class ReportsController extends \Baka\Http\Rest\CrudExtendedController
             $user_id = $jsonData->user_id;
             $title = $jsonData->title;
             $description = $jsonData->description;
-            //$created_at = $jsonData->created_at;
+            $created_at = date("Y-m-d h:i:s");
 
             $report = new Reports();
 
             $report->user_id = $user_id ;
             $report->title = $title;
             $report->description = $description;
-            //$report->created_at = created_at;
+            $report->created_at = created_at;
 
             //If data comes from mobile app
             if($this->request->getContentType() == "application/x-www-form-urlencoded"){

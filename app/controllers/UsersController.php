@@ -12,7 +12,6 @@ use Phalcon\Http\Response;
 
 class UsersController extends \Baka\Http\Rest\CrudExtendedController{
 
-
      /**
      * set objects
      *
@@ -42,6 +41,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
             $user->email = $request['email'];
             $user->password = $request['password'];
             $user->phone = $request['phone'];
+            $user->active = 1;
 
             if(!$user->save()){
                 throw new Exception("User could not be created");
@@ -168,6 +168,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
             $userArray['email'] = $user->email;
             $userArray['password'] = $user->password;
             $userArray['phone'] = $user->phone;
+            $userArray['user_active'] = $user->active;
 
             $usersArray[] = $userArray;
         }
@@ -218,6 +219,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
             
             $email = $jsonData->email;
             $password = $jsonData->password;
+            //$tries = $jsonData->tries;
 
             // $email = $this->request->getPost('email','string');
             // $password = $this->request->getPost('password','string');
@@ -227,15 +229,27 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
 
                 $email = $this->request->getPost('email','string');
                 $password = $this->request->getPost('password','string');
+                //$tries = $this->request->getPost('tries','string');
 
             }
         
             $user = $this->model::findFirst([
-                "conditions" => "email = ?0 AND password = ?1",
-                "bind" =>[$email,$password],
+                "conditions" => "email = ?0 AND password = ?1 AND active = ?2",
+                "bind" =>[$email,$password,1],
             ]);
 
             if(!$user){
+                // if($tries == 3){
+                //     $failedUser = $this->model::findFirst([
+                //         "conditions" => "email = ?0",
+                //         "bind" =>[$email,$password,1],
+                //     ]);
+
+                //     $failedUser->active = 0;
+                //     $failedUser->update();
+
+                //     return $this->response('User has been blocked');
+                // }
                 return $this->response('Email or Password incorrect');
             }
 
@@ -256,7 +270,7 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
 
             $userData['user_type_name'] = $userType->name;
             $userData['session_status'] = "Active " . $this->session->get("id"); 
-                
+
             return $this->response($userData);
 
         }
@@ -279,6 +293,5 @@ class UsersController extends \Baka\Http\Rest\CrudExtendedController{
         }
         
     }
-
 
 }
